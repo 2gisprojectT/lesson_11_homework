@@ -3,6 +3,10 @@ from selenium.webdriver.common.keys import Keys
 from unittest import TestCase
 import unittest
 
+from CreateEditForm import CreateEditForm
+from PageLogin import PageLogin
+from PageRequests import PageRequests
+
 
 class Test(TestCase):
     """
@@ -13,12 +17,11 @@ class Test(TestCase):
     def setUp(self):
         self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(10)
-        self.driver.get("https://www.dropbox.com/requests")
-        email = self.driver.find_element_by_xpath(".//input[@name='login_email']")
-        passwd = self.driver.find_element_by_xpath(".//input[@name='login_password']")
-        email.send_keys("evgenijkatunov@mail.ru")
-        passwd.send_keys("test123")
-        passwd.send_keys(Keys.RETURN)
+        page_login = PageLogin(self.driver)
+        page_login.open("https://www.dropbox.com/requests")
+        email = "evgenijkatunov@mail.ru"
+        passwd = "test123"
+        page_login.login_form.login(email, passwd)
 
     def test_empty_name(self):
         """
@@ -31,10 +34,11 @@ class Test(TestCase):
             Появление сообщения о необходимости ввести тему запроса
         """
 
-        self.driver.find_element_by_class_name("drops-grid-create-new-item").click()
-        self.driver.find_element_by_class_name("button-primary").click()
-        error_msg = self.driver.find_element_by_class_name("text-input-error-wrapper")
-        self.assertEqual("Введите тему вашего запроса файла.", error_msg.text)
+        page = PageRequests(self.driver)
+        page.drops_management_grid.create_request()
+        page.create_edit_form.next_step()
+        error_msg = page.create_edit_form.get_error()
+        self.assertEqual("Введите тему вашего запроса файла.", error_msg)
 
     def test_more_then_maxlen_name(self):
         """
@@ -48,13 +52,15 @@ class Test(TestCase):
         """
 
         name = "a" * 141;
-        self.driver.find_element_by_class_name("drops-grid-create-new-item").click()
-        self.driver.find_element_by_name("drops_title").send_keys(name)
-        self.driver.find_element_by_class_name("button-primary").click()
-        self.driver.find_element_by_class_name("dbmodal-button").click()
-        self.driver.refresh()
-        self.driver.find_elements_by_class_name("actions__link")[0].click()
-        self.assertEqual(name[:140], self.driver.find_element_by_name("drops_title").get_attribute("value"))
+        page = PageRequests(self.driver)
+        page.drops_management_grid.create_request()
+        page.create_edit_form.set_name(name)
+        page.create_edit_form.next_step()
+        page.share_request_form.done()
+        page.refresh()
+        page.drops_management_grid.show_request(0)
+        name_request = page.create_edit_form.get_name()
+        self.assertEqual(name[:140], name_request)
 
     def test_unresolved_symbol_name(self):
         """
@@ -67,11 +73,13 @@ class Test(TestCase):
             Появление сообщения о вводе недопустимых символов
         """
 
-        self.driver.find_element_by_class_name("drops-grid-create-new-item").click()
-        self.driver.find_element_by_name("drops_title").send_keys("test/test")
-        error_msg = self.driver.find_element_by_class_name("text-input-error-wrapper")
+        name = "test/test"
+        page = PageRequests(self.driver)
+        page.drops_management_grid.create_request()
+        page.create_edit_form.set_name(name)
+        error_msg = page.create_edit_form.get_error()
         self.assertEqual("В названиях запрещено использовать косую черточку (/). Пожалуйста, выберите другое название.",
-                         error_msg.text)
+                         error_msg)
 
     def test_overdue_downloads_never(self):
         """
@@ -87,22 +95,19 @@ class Test(TestCase):
         """
 
         name = "TEST2"
-        self.driver.find_element_by_class_name("drops-grid-create-new-item").click()
-        self.driver.find_element_by_name("drops_title").send_keys(name)
-        self.driver.find_element_by_id("enable-deadlines-checkbox").click()
-        # клик по "+Разрешить просроченные загрузки"
-        self.driver.find_element_by_xpath(".//a[@data-reactid='.3.1.0.0.2.0.2.$deadline-description.0.1']").click()
-        # клик по выпадающему списку со сроками просроченной загрузки
-        self.driver.find_element_by_xpath(".//div[@data-reactid='.3.1.0.0.2.0.2.$deadline-description2.1.2']").click()
-        self.driver.find_element_by_xpath(".//div[@title='Никогда']").click()
-        self.driver.find_element_by_class_name("button-primary").click()
-        self.driver.find_element_by_class_name("dbmodal-button").click()
-        self.driver.refresh()
-        self.driver.find_elements_by_class_name("actions__link")[0].click()
-        self.assertEqual(name, self.driver.find_element_by_name("drops_title").get_attribute("value"))
-        self.assertEqual(True,
-                         self.driver.find_element_by_xpath(
-                             ".//a[@data-reactid='.3.1.0.0.2.0.2.$deadline-description.0.1']").is_displayed())
+        page = PageRequests(self.driver)
+        page.drops_management_grid.create_request()
+        page.create_edit_form.set_name(name)
+        page.create_edit_form.set_deadline_flag(True)
+        page.create_edit_form.set_after_deadline_download_period("Никогда")
+        page.create_edit_form.next_step()
+        page.share_request_form.done()
+        page.refresh()
+        page.drops_management_grid.show_request(0)
+        name_request = page.create_edit_form.get_name()
+        displayed = page.create_edit_form.is_displayed_after_deadline_upload_link()
+        self.assertEqual(name, name_request)
+        self.assertTrue(displayed)
 
     def test_overdue_downloads_notnever(self):
         """
@@ -118,23 +123,19 @@ class Test(TestCase):
         """
 
         name = "TEST3"
-        self.driver.find_element_by_class_name("drops-grid-create-new-item").click()
-        self.driver.find_element_by_name("drops_title").send_keys(name)
-        self.driver.find_element_by_id("enable-deadlines-checkbox").click()
-        # клик по "+Разрешить просроченные загрузки"
-        self.driver.find_element_by_xpath(".//a[@data-reactid='.3.1.0.0.2.0.2.$deadline-description.0.1']").click()
-        # клик по выпадающему списку со сроками просроченной загрузки
-        self.driver.find_element_by_xpath(".//div[@data-reactid='.3.1.0.0.2.0.2.$deadline-description2.1.2']").click()
-        self.driver.find_element_by_xpath(".//div[@title='В течении одного дня']").click()
-        self.driver.find_element_by_class_name("button-primary").click()
-        self.driver.find_element_by_class_name("dbmodal-button").click()
-        self.driver.refresh()
-        self.driver.find_elements_by_class_name("actions__link")[0].click()
-        self.assertEqual(name, self.driver.find_element_by_name("drops_title").get_attribute("value"))
-        self.assertEqual("В течении одного дня",
-                         self.driver.find_element_by_xpath(
-                             ".//div[@data-reactid='.3.1.0.0.2.0.2.$deadline-description2.1.2.0']")
-                         .get_attribute("Title"))
+        page = PageRequests(self.driver)
+        page.drops_management_grid.create_request()
+        page.create_edit_form.set_name(name)
+        page.create_edit_form.set_deadline_flag(True)
+        page.create_edit_form.set_after_deadline_download_period("В течении одного дня")
+        page.create_edit_form.next_step()
+        page.share_request_form.done()
+        page.refresh()
+        page.drops_management_grid.show_request(0)
+        name_request = page.create_edit_form.get_name()
+        period = page.create_edit_form.get_after_deadline_download_period()
+        self.assertEqual(name, name_request)
+        self.assertEqual("В течении одного дня", period)
 
     def tearDown(self):
         self.driver.quit()
