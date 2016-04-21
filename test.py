@@ -1,3 +1,5 @@
+from main_page import MainPage
+from Page import PageLogin
 from unittest import TestCase
 import unittest
 import time
@@ -17,9 +19,9 @@ class OttripTest(TestCase):
         """
         self.driver = webdriver.Firefox()
         self.driver.maximize_window()
-        self.driver.implicitly_wait(20)
-        self.driver.get("http://www.onetwotrip.com/ru")
-        self.driver.find_element_by_class_name("enter").click()
+        page = MainPage(self.driver)
+        page.open("http://www.onetwotrip.com/ru")
+        page.top_panel.click_login()
 
     def tearDown(self):
         self.driver.quit()
@@ -35,19 +37,12 @@ class OttripTest(TestCase):
         Ожидание:
         Вывод сообщения об ошибке "Пользователя с таким email не существует" в браузере.
         """
-        driver = self.driver
-        driver.find_element_by_class_name("getNewPas").click()
-        driver.find_element_by_id("input_remind_email").send_keys("llllll@mail.ru")
+        page_auth = PageLogin(self.driver)
+        page_auth.form_auth.forgot_password("lllll@mail.ru")
 
-        button = driver.find_element_by_css_selector(
-            "table.layout:nth-child(2) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > button:nth-child(1)")
-        button.click()
+        error = page_auth.result_forgot_pass.message_incorrect_email()
 
-        WebDriverWait(driver, 5).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "#RemindAuth > div:nth-child(3)")))
-
-        error = driver.find_element_by_css_selector("#RemindAuth > div:nth-child(3)").text
-        self.assertIn("Пользователя с таким email не существует", error)
+        self.assertIn("Пользователя с таким email не существует", error.text)
 
     def test_forgot_password_correct_email(self):
         """
@@ -59,18 +54,11 @@ class OttripTest(TestCase):
         Ожидание:
         Вывод сообщения об отправке нового пароля на указанный email.
         """
-        driver = self.driver
-        driver.find_element_by_class_name("getNewPas").click()
-        driver.find_element_by_id("input_remind_email").send_keys("ld040994@mail.ru")
+        page_auth = PageLogin(self.driver)
+        page_auth.form_auth.forgot_password("ld040994@mail.ru")
 
-        button = driver.find_element_by_css_selector(
-            "table.layout:nth-child(2) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > button:nth-child(1)")
-        button.click()
-
-        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CLASS_NAME, "smallText")))
-
-        message = driver.find_element_by_class_name("smallText")
-        self.assertTrue(message.is_displayed())
+        message = page_auth.result_forgot_pass.message_get_pass()
+        self.assertTrue(message.is_displayed)
 
     def test_auth_incorrect_login(self):
         """
@@ -82,15 +70,12 @@ class OttripTest(TestCase):
         Ожидание:
         Вывод сообщения "Неправильный пароль или почта"
         """
-        driver = self.driver
-        driver.find_element_by_id("input_auth_email").send_keys("l040994@mail.ru")
-        driver.find_element_by_id("input_auth_pas").send_keys("040994alex")
-        driver.find_element_by_class_name("pos_but").click()
+        page_auth = PageLogin(self.driver)
+        page_auth.form_auth.authorization("l040994@mail.ru","040994alex")
 
-        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CLASS_NAME, "Error")))
+        error = page_auth.result_auth.message_incorret_login()
 
-        error = driver.find_element_by_class_name("Error").text
-        self.assertIn("Неправильный пароль или почта", error)
+        self.assertIn("Неправильный пароль или почта", error.text)
 
     def test_auth_correct(self):
         """
@@ -102,14 +87,10 @@ class OttripTest(TestCase):
         Ожидание:
         Успешная авторизация (название кнопки личный кабинет заменяется на email адрес)
         """
-        driver = self.driver
-        driver.find_element_by_id("input_auth_email").send_keys("ld040994@mail.ru")
-        driver.find_element_by_id("input_auth_pas").send_keys("040994alex")
-        driver.find_element_by_class_name("pos_but").click()
+        page_auth = PageLogin(self.driver)
+        page_auth.form_auth.authorization("ld040994@mail.ru","040994alex")
 
-        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CLASS_NAME, "myprofile")))
-
-        profile = driver.find_element_by_class_name("myprofile")
+        profile = page_auth.result_auth.user_name()
         self.assertEqual(profile.text, "ld040994@mail.ru")
 
     def test_auth_facebook(self):
@@ -122,19 +103,10 @@ class OttripTest(TestCase):
         Ожидание:
         Успешная авторизация (название кнопки "личный кабинет" заменяется название профиля)
         """
-        driver = self.driver
-        driver.find_element_by_css_selector(
-            ".sLinks_inside > ul:nth-child(2) > li:nth-child(1) > a:nth-child(1)").click()
-        driver.switch_to.window(driver.window_handles[1])
+        page_auth = PageLogin(self.driver)
+        page_auth.form_auth.auth_facebook("alexld45@mail.ru","040994alex")
 
-        driver.find_element_by_id("email").send_keys("alexld45@mail.ru")
-        driver.find_element_by_id("pass").send_keys("040994alex")
-        driver.find_element_by_id("loginbutton").click()
-        driver.switch_to.window(driver.window_handles[0])
-
-        WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CLASS_NAME, "myprofile")))
-
-        profile = driver.find_element_by_class_name("myprofile")
+        profile = page_auth.result_auth.user_name()
         self.assertEqual(profile.text, "Алексей Демин")
 
 
