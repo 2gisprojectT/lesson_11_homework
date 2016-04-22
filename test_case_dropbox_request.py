@@ -4,20 +4,25 @@ from selenium import webdriver
 from datetime import datetime, timedelta
 from ddt import ddt, data
 import locale
-
+from login_page import LoginPage
+from home_page import HomePage
+from requests_page import RequestsPage
+from request_download_page import RequestDownloadPage
 
 @ddt
 class DropboxTest(TestCase):
     def setUp(self):
-        """ Предусловие: зайти на сайт dropbox.com, аутентифицироваться """
+        """
+        Предусловие: зайти на сайт dropbox.com, аутентифицироваться
+        """
         locale.setlocale(locale.LC_ALL, "russian")
+
         self.driver = webdriver.Firefox()
-        self.driver.get("https://www.dropbox.com")
         self.driver.implicitly_wait(10)
-        self.driver.find_element_by_id("sign-in").click()
-        self.driver.find_element_by_xpath(".//input[@name='login_email']").send_keys("testcase.dropbox@mail.ru")
-        self.driver.find_element_by_xpath(".//input[@name='login_password']").send_keys("projectT111")
-        self.driver.find_element_by_class_name("login-button").click()
+        self.page = LoginPage(self.driver)
+        self.page.open("https://www.dropbox.com")
+        self.page.head_panel.sign_in("testcase.dropbox@mail.ru", "projectT111")
+        self.page = HomePage(self.driver)
 
     @data(["Т", None],
           ["Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французс", "Запросы файлов"])
@@ -25,34 +30,32 @@ class DropboxTest(TestCase):
         """
         Заголовок: Запрос без срока загрузки
         Шаги
-            1. Нажать на кнопку "Запросить файлы".
-            2. В поле "Какой файл вам нужен?" ввести значение колонки "Наименование/описание файла".
-            3. В поле "В какой папке в вашем Dropbox следует разместить файлы?" выполнить действие, указанное в колонке "Папка, куда поместить файл".
-            4. Опцию "Добавить срок" оставить выключенной.
-            5. Нажать кнопку "Далее".
-            6. В появившемся окне "Отправить запрос файла" нажать кнопку "Копировать ссылку" и нажать кнопку "Готово"
-            7. В соседней вкладке браузера перейти по ссылке, скопированной в п.3.6.
+            1. Перейти на страницу запросов файлов
+            2. Нажать на кнопку "Запросить файлы"
+            3. В поле "Какой файл вам нужен?" ввести наименование/описание файла
+            4. В поле "В какой папке в вашем Dropbox следует разместить файлы?" задать указанную папку или не задавать (None)
+            5. Нажать кнопку "Далее"
+            6. В появившемся окне "Отправить запрос файла" скопировать ссылку и нажать кнопку "Готово"
         Проверки:
-            1. На странице запросов файлов (https://www.dropbox.com/requests) появился созданный запрос.
-            2. На странице п.3.7 отображен функционал загрузки созданного запроса.
+            1. На странице запросов файлов появился созданный запрос
+            2. На странице п.3.6 отображен функционал загрузки созданного запроса
         """
-        self.driver.find_element_by_class_name("drops-nav-item").click()
-        self.driver.find_element_by_class_name("drops-grid-create-new-item").click()
-        self.driver.find_element_by_name("drops_title").send_keys(value[0])
+        self.page.main_panel.requests()
+        self.page = RequestsPage(self.driver)
+        self.page.requests_grid.create_request()
+        self.page.request_edit_form.set_file_name(value[0])
         if value[1] is not None:
-            self.driver.find_element_by_class_name("create-edit-form-destination-change").click()
-            self.driver.find_element_by_xpath(".//span[@data-reactid='.3.1.0.0.2.0.1.0.0.0.1.0.$/"+value[1]+".0']").click()
-            self.driver.find_element_by_class_name("choose-folder-buttons").click()
-        self.driver.find_element_by_class_name("button-primary").click()
-        link = self.driver.find_element_by_id("drop-link-field").get_attribute("value")
-        self.driver.find_element_by_class_name("button-primary").click()
-        self.driver.find_elements_by_class_name("actions__link")[0].click()
-        self.driver.find_element_by_class_name("create-edit-form").click()
-        request_name = self.driver.find_element_by_class_name("text-input-input").get_attribute("value")
+            self.page.request_edit_form.set_folder(value[1])
+        self.page.request_edit_form.save()
+        link = self.page.request_share_form.get_link()
+        self.page.request_share_form.done()
+
+        self.page.requests_grid.edit_request(0)
+        request_name = self.page.request_edit_form.get_file_name()
+        self.page = RequestDownloadPage(self.driver)
+        self.page.open(link)
         self.assertEqual(value[0], request_name)
-        self.driver.get(link)
-        info = self.driver.find_element_by_class_name("info__title")
-        self.assertEqual(value[0], info.text)
+        self.assertEqual(value[0], self.page.request_download_panel.get_title())
 
     @data(["Т", None],
           ["Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французс", "Запросы файлов"])
@@ -61,101 +64,87 @@ class DropboxTest(TestCase):
         Заголовок: Запрос со сроком загрузки "текущая дата"
         Предусловие: Тест выполнить раньше 23:00
         Шаги
-            1. Нажать на кнопку "Запросить файлы".
-            2. В поле "Какой файл вам нужен?" ввести значение колонки "Наименование/описание файла".
-            3. В поле "В какой папке в вашем Dropbox следует разместить файлы?" выполнить действие, указанное в колонке "Папка, куда поместить файл".
-            4. Опцию "Добавить срок" включить.
-            5. В поле с датой указать текущую дату.
-            6. В поле с временем указать время, превышающее текущее время (23:00).
-            7. Нажать кнопку "Далее".
-            8. В появившемся окне "Отправить запрос файла" нажать кнопку "Копировать ссылку" и нажать кнопку "Готово"
-            9. В соседней вкладке браузера перейти по ссылке, скопированной в п.3.6.
+            1. Перейти на страницу запросов файлов
+            2. Нажать на кнопку "Запросить файлы"
+            3. В поле "Какой файл вам нужен?" ввести наименование/описание файла
+            4. В поле "В какой папке в вашем Dropbox следует разместить файлы?" задать указанную папку или не задавать (None)
+            5. Добавить срок загрузки: текущая дата, время 23:00
+            6. Нажать кнопку "Далее"
+            7. В появившемся окне "Отправить запрос файла" скопировать ссылку и нажать кнопку "Готово"
         Проверки:
-            1. На странице запросов файлов (https://www.dropbox.com/requests) появился созданный запрос.
-            2. На странице п.3.7 отображен функционал загрузки созданного запроса с указанным сроком загрузки(п.3.5-3.6).
+            1. На странице запросов файлов появился созданный запрос
+            2. На странице п.3.7 отображен функционал загрузки созданного запроса с указанным сроком загрузки(п.3.5)
         """
-        self.driver.find_element_by_class_name("drops-nav-item").click()
-        self.driver.find_element_by_class_name("drops-grid-create-new-item").click()
-        self.driver.find_element_by_name("drops_title").send_keys(value[0])
+        deadline_day = datetime.today()
+        deadline_time = '23:00'
+
+        self.page.main_panel.requests()
+        self.page = RequestsPage(self.driver)
+        self.page.requests_grid.create_request()
+        self.page.request_edit_form.set_file_name(value[0])
         if value[1] is not None:
-            self.driver.find_element_by_class_name("create-edit-form-destination-change").click()
-            self.driver.find_element_by_xpath(".//span[@data-reactid='.3.1.0.0.2.0.1.0.0.0.1.0.$/"+value[1]+".0']").click()
-            self.driver.find_element_by_class_name("choose-folder-buttons").click()
-        self.driver.find_element_by_id("enable-deadlines-checkbox").click()
-        self.driver.find_element_by_class_name("c-input").click()
-        download_day = datetime.today()
-        self.driver.find_element_by_id("day" + str(download_day.day) + "-" + str(download_day.month - 1)).click()
-        self.driver.find_element_by_class_name("c-time-selector").click()
-        self.driver.find_element_by_xpath(".//div[@title='23:00 ']").click()
-        self.driver.find_element_by_class_name("button-primary").click()
-        link = self.driver.find_element_by_id("drop-link-field").get_attribute("value")
-        self.driver.find_element_by_class_name("button-primary").click()
-        self.driver.find_elements_by_class_name("actions__link")[0].click()
-        self.driver.find_element_by_class_name("create-edit-form").click()
-        request_name = self.driver.find_element_by_class_name("text-input-input").get_attribute("value")
+            self.page.request_edit_form.set_folder(value[1])
+        self.page.request_edit_form.set_deadline(deadline_day, deadline_time)
+        self.page.request_edit_form.save()
+        link = self.page.request_share_form.get_link()
+        self.page.request_share_form.done()
+
+        self.page.requests_grid.edit_request(0)
+        request_name = self.page.request_edit_form.get_file_name()
+        self.page = RequestDownloadPage(self.driver)
+        self.page.open(link)
         self.assertEqual(value[0], request_name)
-        self.driver.get(link)
-        info = self.driver.find_element_by_class_name("info__title")
-        self.assertEqual(value[0], info.text)
-        text_deadline = self.driver.find_element_by_class_name("file_collector__deadlines-pill").text
-        time_download = download_day.strftime('%B').lower() + " " + str(download_day.day) + ", " \
-                        + str(download_day.year) + " 23:00"
-        self.assertIn(time_download, text_deadline)
+        self.assertEqual(value[0], self.page.request_download_panel.get_title())
+        deadline = deadline_day.strftime('%B').lower() + " " + str(deadline_day.day) + ", " \
+                        + str(deadline_day.year) + " " + deadline_time
+        self.assertIn(deadline, self.page.request_download_header.get_deadline())
 
     @data(["Т", None, 1, "Никогда"],
-          ["Т", "Запросы файлов", 3, "В течении одного дня"],
-          ["Т", None, 7, "В течение двух дней"],
+          ["Т", "Запросы файлов", 30, "В течении одного дня"],
+          ["Т", None, 365, "В течение двух дней"],
           ["Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французс", "Запросы файлов", 1, "В течение недели"],
-          ["Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французс", None, 3, "В течение 30 дней"],
-          ["Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французс", "Запросы файлов", 7, "Всегда"])
+          ["Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французс", None, 30, "В течение 30 дней"],
+          ["Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французс", "Запросы файлов", 365, "Всегда"])
     def test_create_request_pairwise_overdue_download(self, value):
         """
         Заголовок: Запрос со сроком загрузки больше текущей даты и включенной опцией просроченных загрузок
         Шаги
-            1. Нажать на кнопку "Запросить файлы".
-            2. В поле "Какой файл вам нужен?" ввести значение колонки "Наименование/описание файла".
-            3. В поле "В какой папке в вашем Dropbox следует разместить файлы?" выбрать указанную папку или не задавать папку (None).
-            4. Опцию "Добавить срок" включить.
-            5. В поле с датой указать дату срока загрузки.
-            6. В поле с временем валидное время(11:00).
-            7. Нажать на выделенный текст "+ Разрешить просроченные загрузки", в выпадающем списке "Разрешить просроченные загрузки:" указать значение из колонки "Опция просроченных загрузок"
-            8. Нажать кнопку "Далее".
-            9. В появившемся окне "Отправить запрос файла" нажать кнопку "Копировать ссылку" и нажать кнопку "Готово"
-            10. В соседней вкладке браузера перейти по ссылке, скопированной в п.3.6.
+            1. Перейти на страницу запросов файлов
+            2. Нажать на кнопку "Запросить файлы"
+            3. В поле "Какой файл вам нужен?" ввести наименование/описание файла
+            4. В поле "В какой папке в вашем Dropbox следует разместить файлы?" задать указанную папку или не задавать (None)
+            5. Добавить срок загрузки: дата из таблицы, время 11:00
+            6. Добавить значение просроченных загрузок
+            7. Нажать кнопку "Далее"
+            8. В появившемся окне "Отправить запрос файла" скопировать ссылку и нажать кнопку "Готово"
         Проверки:
-            1. На странице запросов файлов (https://www.dropbox.com/requests) появился созданный запрос.
-            2. На странице п.3.7 отображен функционал загрузки созданного запроса с указанным сроком загрузки(п.3.5-3.6).
+            1. На странице запросов файлов появился созданный запрос
+            2. На странице п.3.8 отображен функционал загрузки созданного запроса с указанным сроком загрузки(п.3.5)
         """
-        self.driver.find_element_by_class_name("drops-nav-item").click()
-        self.driver.find_element_by_class_name("drops-grid-create-new-item").click()
-        self.driver.find_element_by_name("drops_title").send_keys(value[0])
+        deadline_day = datetime.today() + timedelta(days=value[2])
+        deadline_time = '11:00'
+
+        self.page.main_panel.requests()
+        self.page = RequestsPage(self.driver)
+        self.page.requests_grid.create_request()
+        self.page.request_edit_form.set_file_name(value[0])
         if value[1] is not None:
-            self.driver.find_element_by_class_name("create-edit-form-destination-change").click()
-            self.driver.find_element_by_xpath(".//span[@data-reactid='.3.1.0.0.2.0.1.0.0.0.1.0.$/"+value[1]+".0']").click()
-            self.driver.find_element_by_class_name("choose-folder-buttons").click()
-        self.driver.find_element_by_id("enable-deadlines-checkbox").click()
-        self.driver.find_element_by_class_name("c-input").click()
-        download_day = datetime.today() + timedelta(days=value[2])
-        self.driver.find_element_by_id("day" + str(download_day.day) + "-" + str(download_day.month - 1)).click()
-        self.driver.find_element_by_class_name("c-time-selector").click()
-        self.driver.find_element_by_xpath(".//div[@title='11:00 ']").click()
-        self.driver.find_element_by_xpath(".//a[@data-reactid='.3.1.0.0.2.0.2.$deadline-description.0.1']").click()
-        self.driver.find_element_by_class_name("c-deadlines__grace-period-selector").click()
-        self.driver.find_element_by_xpath(".//div[@title='"+value[3]+"']").click()
-        self.driver.find_element_by_class_name("button-primary").click()
-        link = self.driver.find_element_by_id("drop-link-field").get_attribute("value")
-        self.driver.find_element_by_class_name("button-primary").click()
-        self.driver.find_elements_by_class_name("actions__link")[0].click()
-        self.driver.find_element_by_class_name("create-edit-form").click()
-        request_name = self.driver.find_element_by_class_name("text-input-input").get_attribute("value")
+            self.page.request_edit_form.set_folder(value[1])
+        self.page.request_edit_form.set_deadline(deadline_day, deadline_time)
+        self.page.request_edit_form.set_deadline_overdue(value[3])
+        self.page.request_edit_form.save()
+        link = self.page.request_share_form.get_link()
+        self.page.request_share_form.done()
+
+        self.page.requests_grid.edit_request(0)
+        request_name = self.page.request_edit_form.get_file_name()
+        self.page = RequestDownloadPage(self.driver)
+        self.page.open(link)
         self.assertEqual(value[0], request_name)
-        self.driver.get(link)
-        info = self.driver.find_element_by_class_name("info__title")
-        self.assertEqual(value[0], info.text)
-        text_deadline = self.driver.find_element_by_class_name("file_collector__deadlines-pill").text
-        time_download = download_day.strftime('%B').lower() + " " + str(download_day.day) + ", " \
-                        + str(download_day.year) + " 11:00"
-        self.assertIn(time_download, text_deadline)
+        self.assertEqual(value[0], self.page.request_download_panel.get_title())
+        deadline = deadline_day.strftime('%B').lower() + " " + str(deadline_day.day) + ", " \
+                        + str(deadline_day.year) + " " + deadline_time
+        self.assertIn(deadline, self.page.request_download_header.get_deadline())
 
     @data(["Тест \ : ? * \" |", "Не допускаются угловые скобки, а также следующие символы: \ / : ? * \" |"],
           ["   ", "Введите тему вашего запроса файла."])
@@ -163,38 +152,42 @@ class DropboxTest(TestCase):
         """
         Заголовок: Невалидное наименование запроса
         Шаги
-            1. Нажать на кнопку "Запросить файлы".
-            2. В поле "Какой файл вам нужен?" ввести значение колонки "Наименование/описание файла".
-            3. В поле "В какой папке в вашем Dropbox следует разместить файлы?" не задавать папку.
-            4. Опцию "Добавить срок" оставить выключенной.
-            5. Нажать кнопку "Далее".
+            1. Перейти на страницу запросов файлов
+            2. Нажать на кнопку "Запросить файлы"
+            3. В поле "Какой файл вам нужен?" ввести наименование/описание файла
+            4. Нажать кнопку "Далее"
         Проверки:
-            1. Всплывает предупреждение пользователя.
+            1. Всплывает предупреждение пользователя
         """
-        self.driver.find_element_by_class_name("drops-nav-item").click()
-        self.driver.find_element_by_class_name("drops-grid-create-new-item").click()
-        self.driver.find_element_by_name("drops_title").send_keys(value[0])
-        self.driver.find_element_by_class_name("button-primary").click()
-        notify = self.driver.find_element_by_id("notify-msg").text
-        self.assertEqual(value[1], notify)
+        self.page.main_panel.requests()
+        self.page = RequestsPage(self.driver)
+        self.page.requests_grid.create_request()
+        self.page.request_edit_form.set_file_name(value[0])
+        self.page.request_edit_form.save()
+
+        self.assertEqual(value[1], self.page.request_edit_form.get_notify())
 
     def test_negative_create_request_invalid_name_max_length(self):
         """
         Заголовок: Длина наименования запроса max+1
         Шаги
-            1. Нажать на кнопку "Запросить файлы".
-            2. В поле "Какой файл вам нужен?" ввести "Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французсК".
+            1. Перейти на страницу запросов файлов
+            2. Нажать на кнопку "Запросить файлы"
+            3. В поле "Какой файл вам нужен?" ввести строку длиной 141
         Проверки:
-            1. Последний символ из наименования файла не удается ввести.
+            1. Последний символ из наименования файла не удается ввести
         """
-        self.driver.find_element_by_class_name("drops-nav-item").click()
-        self.driver.find_element_by_class_name("drops-grid-create-new-item").click()
-        self.driver.find_element_by_name("drops_title").send_keys("Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французсК")
-        request_name = self.driver.find_element_by_class_name("text-input-input").get_attribute("value")
-        self.assertEqual(request_name, "Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французс")
+        value = "Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французских булок, да выпей чаю. Съешь ещё этих мягких французсК"
+
+        self.page.main_panel.requests()
+        self.page = RequestsPage(self.driver)
+        self.page.requests_grid.create_request()
+        self.page.request_edit_form.set_file_name(value)
+
+        request_name = self.page.request_edit_form.get_file_name()
+        self.assertEqual(value[:140], request_name)
 
     def tearDown(self):
-        """ Завершение сессии """
         self.driver.quit()
 
 if __name__ == '__main__':
