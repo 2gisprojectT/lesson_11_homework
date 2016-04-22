@@ -31,7 +31,7 @@ class OneTwoTripTests(unittest.TestCase):
         page_auth = UserAuthPage(self.driver)
 
         page_auth.user_auth.authorization("antonprojectt@leeching.net", "abcd123")
-        error_info = page_auth.user_auth.get_error()
+        error_info = page_auth.user_auth.get_error_auth()
         self.assertEqual(error_info, "Неправильный пароль или почта")
 
     def test_twitter_authorization(self):
