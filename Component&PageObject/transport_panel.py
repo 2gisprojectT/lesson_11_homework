@@ -10,11 +10,11 @@ class TransportPanel(BaseComponent):
         'subway_button': ".searchBar__transportSubway"
     }
 
-    def car_button(self):
+    def car_button_click(self):
         self.driver.find_element_by_css_selector(self.selectors['car_button']).click()
 
-    def public_button(self):
+    def public_button_click(self):
         self.driver.find_element_by_css_selector(self.selectors['public_button']).click()
 
-    def subway_button(self):
+    def subway_button_click(self):
         self.driver.find_element_by_css_selector(self.selectors['subway_button']).click()
