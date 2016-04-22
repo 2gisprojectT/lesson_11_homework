@@ -15,9 +15,9 @@ class ForgotPassResult(BaseComponent):
     def message_incorrect_email(self):
         WebDriverWait(self.driver, 5).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, self.selectors['mes_incorrect_email'])))
-        return self.driver.find_element_by_css_selector(self.selectors['mes_incorrect_email'])
+        return self.driver.find_element_by_css_selector(self.selectors['mes_incorrect_email']).text
 
     def message_get_pass(self):
         WebDriverWait(self.driver, 5).until(
             EC.visibility_of_element_located((By.CLASS_NAME, self.class_name['mes_get_new_pass'])))
-        return self.driver.find_element_by_class_name(self.class_name['mes_get_new_pass'])
+        return self.driver.find_element_by_class_name(self.class_name['mes_get_new_pass']).is_displayed
