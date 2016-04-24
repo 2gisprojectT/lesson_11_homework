@@ -2,11 +2,12 @@ from unittest import TestCase
 import unittest
 from selenium import webdriver
 from selenium.webdriver import ActionChains
-from page import Page
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 class SiteTestCase(TestCase):
-
     def setUp(self):
         """
             Начальные условия:
@@ -14,11 +15,17 @@ class SiteTestCase(TestCase):
         """
         self.driver = webdriver.Firefox()
         self.driver.maximize_window()
-        self.actions = ActionChains(self.driver)
         self.driver.implicitly_wait(20)
+        self.driver.get('https://2gis.ru')
 
-        self.page = Page(self.driver, self.actions)
-        self.page.open('https://2gis.ru')
+        self.actions = ActionChains(self.driver)
+        self.zoom = self.driver.find_element_by_class_name('zoom__inButton')
+        self.map_element = self.driver.find_element_by_class_name('map')
+
+    def inc_zoom(self, count):
+        while count > 0:
+            self.zoom.click()
+            count -= 1
 
     def test_click_district(self):
         """
@@ -27,11 +34,13 @@ class SiteTestCase(TestCase):
             Шаги:
                 1. Кликнуть по любым координатам Центрального округа
             Ожидаемый результат:
-                Появится карточка Центрального округа с соответствующим названием
+                Всплывет карточка Центрального округа с соответствующим названием
         """
-        self.page.map.click('Центральный округ')
+        self.actions.move_to_element_with_offset(self.map_element, 950, 300).click().perform()
 
-        self.assertEqual(self.page.geo_card.title, 'Центральный округ')
+        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, 'callout__headerTitle')))
+        district_text = self.driver.find_element_by_class_name('callout__headerTitle').text
+        self.assertEqual(district_text, 'Центральный округ')
 
     def test_click_object_with_zoom(self):
         """
@@ -41,17 +50,19 @@ class SiteTestCase(TestCase):
                 1. Приблизить карту минимум 4 раза
                 2. Кликнуть по любым координатам Первомайского сквера
             Ожидаемый результат:
-                Появится карточка Первомайского сквера с соответствующим названием
+                Всплывет карточка Первомайского сквера с соответствующим названием
         """
-        self.page.scale_bar.increase(4)
-        self.page.map.click('Первомайский сквер')
+        self.inc_zoom(4)
+        self.actions.move_to_element_with_offset(self.map_element, 1100, 270).click().perform()
 
-        self.assertEqual(self.page.geo_card.title, 'Первомайский сквер')
+        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, 'callout__headerTitle')))
+        click_object_text = self.driver.find_element_by_class_name('callout__headerTitle').text
+        self.assertEqual(click_object_text, 'Первомайский сквер')
 
     def test_click_object_and_search(self):
         """
             Test Case:
-                Сравнение информации карточки организации по клику на карте и после поиска
+                Сравнение информации всплывающего окна организации и карточки организации после поиска
             Шаги:
                 1. Приблизить карту минимум 4 раза
                 2. Кликнуть по любым координатам Оперного театра
@@ -60,49 +71,62 @@ class SiteTestCase(TestCase):
             Ожидаемый результат:
                 Название организации на карточке после поиска и на всплывающем окне совпадет
         """
-        self.page.scale_bar.increase(4)
-        self.page.map.click('Оперный театр')
-        click_object_text = self.page.geo_card.title
+        self.inc_zoom(4)
+        self.actions.move_to_element_with_offset(self.map_element, 1250, 210).click().perform()
+        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, 'callout__headerTitle')))
+        click_object_text = self.driver.find_element_by_class_name('callout__headerTitle').text
 
-        self.page.search_bar.search('Оперный театр')
-        self.page.search_result.first_result.click()
+        self.driver.find_element_by_class_name('suggest__input').send_keys('Оперный театр')
+        self.driver.find_element_by_class_name('searchBar__submit').click()
+        self.driver.find_element_by_class_name('miniCard__headerTitleLink').click()
+        search_object_text = self.driver.find_element_by_class_name('cardHeader__headerNameText').text
 
-        self.assertEqual(('' + click_object_text).lower(), ('' + self.page.firm_card.title).lower())
+        self.assertEqual(('' + click_object_text).lower(), ('' + search_object_text).lower())
 
-    def test_click_object_and_near_stop(self):
+    def test_click_object_and_entrance(self):
         """
             Test Case:
-                Проверка функции нахождения ближайшей станции метро
+                Проверка отображаемой информации на карточке после нажатия на кнопку "Найти вход"
             Шаги:
                 1. Приблизить карту минимум 4 раза
                 2. Кликнуть по любым координатам Оперного театра
-                3. Кликнуть по найденной ближайшей станции метро
+                3. Кликнуть по кнопке "Найти вход"
             Ожидаемый результат:
-                Появится карточка метро с соответствующим названием
+                Всплывшее окно организации на карте пропадет
+                На карте стрелочкой будет показан вход в здание
+                Отобразится карточка организации Оперный театр с соответствующим названием
         """
-        self.page.scale_bar.increase(4)
-        self.page.map.click('Оперный театр')
-        self.page.geo_card.near_stop()
+        self.inc_zoom(4)
+        self.actions.move_to_element_with_offset(self.map_element, 1250, 210).click().perform()
+        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, 'callout__headerTitle')))
+        click_object_text = self.driver.find_element_by_class_name('callout__headerTitle').text
 
-        self.assertEqual(self.page.metro_card.title, "Площадь Ленина")
+        self.driver.find_element_by_class_name('callout__entrance').click()
+        entrance_object_text = self.driver.find_element_by_class_name('geoCard2__name').text
 
-    def test_click_object_and_gallery(self):
+        self.assertEqual(click_object_text, entrance_object_text)
+
+    def test_click_object_and_details(self):
         """
             Test Case:
-                Проверка возможности просмотра фотографий организации
+                Проверка отображаемой информации на карточке после нажатия на кнопку "Узнать больше"
             Шаги:
                 1. Приблизить карту минимум 4 раза
                 2. Кликнуть по любым координатам Оперного театра
-                3. Кликнуть по кнопке Фото
+                3. Кликнуть по кнопке "Узнать больше"
             Ожидаемый результат:
-                Появится карточка с фотографиями и адресом оррганизации
+                Всплывшее окно организации на карте пропадет
+                Отобразится карточка организации Оперный театр с соответствующим названием
         """
-        self.page.scale_bar.increase(4)
-        self.page.map.click('Оперный театр')
-        address = self.page.geo_card.address_link.text
-        self.page.geo_card.photos()
+        self.inc_zoom(4)
+        self.actions.move_to_element_with_offset(self.map_element, 1250, 210).click().perform()
+        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, 'callout__headerTitle')))
+        click_object_text = self.driver.find_element_by_class_name('callout__headerTitle').text
 
-        self.assertEqual(address, self.page.gallery_card.title)
+        self.driver.find_element_by_class_name('callout__details').click()
+        details_object_text = self.driver.find_element_by_class_name('geoCard2__name').text
+
+        self.assertEqual(click_object_text, details_object_text)
 
     def tearDown(self):
         self.driver.quit()
