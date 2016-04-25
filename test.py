@@ -40,7 +40,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.forgot_password("lllll@mail.ru")
 
-        error = page_auth.result_forgot_pass.message_incorrect_email()
+        error = page_auth.result_forgot_pass.get_message_incorrect_email()
 
         self.assertIn("Пользователя с таким email не существует", error)
 
@@ -57,7 +57,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.forgot_password("ld040994@mail.ru")
 
-        message = page_auth.result_forgot_pass.message_get_pass()
+        message = page_auth.result_forgot_pass.message_sending_new_pass_is_displayed()
         self.assertTrue(message)
 
     def test_auth_incorrect_login(self):
@@ -73,7 +73,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.authorization("l040994@mail.ru","040994alex")
 
-        error = page_auth.result_auth.message_incorret_login()
+        error = page_auth.result_auth.get_incorrect_login_message()
 
         self.assertIn("Неправильный пароль или почта", error)
 
@@ -90,7 +90,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.authorization("ld040994@mail.ru","040994alex")
 
-        profile = page_auth.result_auth.user_name()
+        profile = page_auth.result_auth.get_user_name()
         self.assertEqual(profile, "ld040994@mail.ru")
 
     def test_auth_facebook(self):
@@ -106,7 +106,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.auth_facebook("alexld45@mail.ru","040994alex")
 
-        profile = page_auth.result_auth.user_name()
+        profile = page_auth.result_auth.get_user_name()
         self.assertEqual(profile, "Алексей Демин")
 
 
