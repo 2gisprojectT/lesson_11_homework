@@ -21,7 +21,7 @@ class OttripTest(TestCase):
         self.driver.maximize_window()
         page = MainPage(self.driver)
         page.open("http://www.onetwotrip.com/ru")
-        page.top_panel.click_login()
+        page.top_panel.click_button_personal_area()
 
     def tearDown(self):
         self.driver.quit()
@@ -40,7 +40,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.forgot_password("lllll@mail.ru")
 
-        error = page_auth.result_forgot_pass.get_message_incorrect_email()
+        error = page_auth.result_forgot_pass.get_error_message_incorrect_email()
 
         self.assertIn("Пользователя с таким email не существует", error)
 
@@ -73,7 +73,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.authorization("l040994@mail.ru","040994alex")
 
-        error = page_auth.result_auth.get_incorrect_login_message()
+        error = page_auth.result_auth.get_error_message_incorrect_login()
 
         self.assertIn("Неправильный пароль или почта", error)
 
