@@ -35,7 +35,6 @@ class PageRequests:
         self.drops_management_grid.show_request(num)
         name = self.create_edit_form.get_name()
         period = self.create_edit_form.get_after_deadline_download_period()
-        print(period)
         self.create_edit_form.close()
         return name, period
 
