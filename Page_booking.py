@@ -1,8 +1,7 @@
-class Page_booking():
-    def __init__(self, driver, wait):
+class PageBooking():
+    def __init__(self, driver):
 
         self.driver = driver
-        self.wait = wait
         self.passenger_inf = None
         self.choice_flight = None
 
@@ -11,7 +10,7 @@ class Page_booking():
         from Passenger_info import Passenger
 
         if self.passenger_inf is None:
-            self.passenger_inf = Passenger(self.driver, self.wait)
+            self.passenger_inf = Passenger(self.driver)
         return self.passenger_inf
 
     @property
@@ -19,7 +18,7 @@ class Page_booking():
         from Flight import Flight
 
         if self.choice_flight is None:
-            self.choice_flight = Flight(self.driver, self.wait)
+            self.choice_flight = Flight(self.driver)
         return self.choice_flight
 
     def open(self, url):

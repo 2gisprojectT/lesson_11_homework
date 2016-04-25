@@ -1,11 +1,9 @@
 from Base_component import BaseComponent
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 class Passenger(BaseComponent):
 
-    selector = {
+    selectors = {
         'email': '#input_avia_book_email',
         'lastname': '#input_lastName0',
         'firstname': '#input_firstName0',
@@ -14,18 +12,18 @@ class Passenger(BaseComponent):
     }
 
     def passenger_inf(self, email, lastname, firstName, passport):
-        elem = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, self.selector['email'])))
+        elem = self.driver.find_element_by_css_selector(self.selectors['email'])
         elem.send_keys(email)
-        elem = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, self.selector['lastname'])))
+        elem = self.driver.find_element_by_css_selector(self.selectors['lastname'])
         elem.send_keys(lastname)
-        elem = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, self.selector['firstname'])))
+        elem = self.driver.find_element_by_css_selector(self.selectors['firstname'])
         elem.send_keys(firstName)
         elem.send_keys(Keys.TAB, Keys.NUMPAD0, Keys.NUMPAD4, Keys.NUMPAD0, Keys.NUMPAD4, Keys.NUMPAD2, Keys.NUMPAD0,
                        Keys.NUMPAD1, Keys.NUMPAD6)
-        elem = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, self.selector['passport'])))
+        elem = self.driver.find_element_by_css_selector(self.selectors['passport'])
         elem.send_keys(passport)
         elem.send_keys(Keys.TAB, Keys.ENTER)
 
     @property
     def error(self):
-        return self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, self.selector['error']))).text
+        return self.driver.find_element_by_css_selector(self.selectors['error']).text

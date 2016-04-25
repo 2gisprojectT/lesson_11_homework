@@ -1,8 +1,7 @@
 from selenium import webdriver
 from unittest import TestCase
-from selenium.webdriver.support.ui import WebDriverWait
 from Page import Page
-from Page_booking import  Page_booking
+from Page_booking import PageBooking
 
 class RightWork(TestCase):
 
@@ -12,14 +11,14 @@ class RightWork(TestCase):
         1.  Зайти на сайт www.onetwotrip.com
         """
         self.driver = webdriver.Firefox()
-        self.wait = WebDriverWait(self.driver, 10)
-        self.page = Page(self.driver, self.wait)
+        self.driver.implicitly_wait(10)
+        self.page = Page(self.driver)
         self.page.open("http://www.onetwotrip.com/")
 
     def tearDown(self):
         self.driver.quit()
 
-    def test_WrongCities(self):
+    def test_wrong_cities(self):
         """
          Шаги :
          1. Выбрать тип рейса "В одну сторону"
@@ -31,13 +30,13 @@ class RightWork(TestCase):
          Появляется сообщение "Неверно задан маршрут. Совпадают пункты вылета и прилёта."
          """
         flight_info = self.page.inf_about_flight
-        flight_info.one_direction()
+        flight_info.select_one_direction()
         flight_info.from_to('Новосибирск', 'Новосибирск')
         flight_info.date_to()
         flight_info.button_find()
         self.assertEqual(flight_info.error, 'Неверно задан маршрут. Совпадают пункты вылета и прилёта.')
 
-    def test_WrongDates(self):
+    def test_wrong_dates(self):
         """
             Шаги :
             1. Выбрать тип рейса "Туда и обратно"
@@ -50,14 +49,14 @@ class RightWork(TestCase):
             Появляется сообщение "Неверно заданы даты"
             """
         flight_info = self.page.inf_about_flight
-        flight_info.two_directions()
+        flight_info.select_two_directions()
         flight_info.from_to('Новосибирск','Екатеринбург')
         flight_info.date_to()
         flight_info.date_back()
         flight_info.button_find()
         self.assertEqual(flight_info.error, 'Неверно заданы даты')
 
-    def test_Autorization(self):
+    def test_autorization(self):
         """
             Шаги :
             1. Открыть "Личный кабинет"
@@ -73,7 +72,7 @@ class RightWork(TestCase):
         autorization.input_inf('fedosovdn@mail.ru', 'ltdrbcexrb')
         autorization.check_name('fedosov0405')
 
-    def test_WrongRegistration(self):
+    def test_wrong_registration(self):
         """
             Шаги :
             1. Открыть "Личный кабинет"
@@ -104,14 +103,14 @@ class RightWork(TestCase):
                 Появляется сообщение "Количество младенцев в брони не должно превышать количество взрослых."
                 """
         flight_info = self.page.inf_about_flight
-        flight_info.one_direction()
+        flight_info.select_one_direction()
         flight_info.from_to('Новосибирск', 'Екатеринбург')
         flight_info.date_to()
         flight_info.button_find()
 
-        self.page_booking = Page_booking(self.driver, self.wait)
+        self.page_booking = PageBooking(self.driver)
         choice_flight = self.page_booking.choose_flight
-        choice_flight.chosing_flight()
+        choice_flight.select_flight()
         passenger = self.page_booking.inf_about_passenger
         passenger.passenger_inf('jsmith@mail.ru','Jonh','Smith','2849729785')
         self.assertEqual(passenger.error, 'Количество младенцев в брони не должно превышать количество взрослых.')

@@ -4,10 +4,9 @@ from selenium.webdriver.common.by import By
 
 class Flight(BaseComponent):
 
-    selector = {
+    selectors = {
         'flight': '//*[@id="FirstPrefered"]/div/div/div[3]/button'
     }
 
-    def chosing_flight(self):
-        self.wait.until(
-            EC.element_to_be_clickable((By.XPATH, self.selector['flight']))).click()
+    def select_flight(self):
+        self.driver.find_element_by_xpath(self.selectors['flight']).click()
