@@ -10,7 +10,7 @@ class FiveTestsCases(TestCase):
         self.driver.implicitly_wait(5)
         self.page = PageObjects(self.driver)
         self.page.open('http://2gis.ru/novosibirsk')
-        self.page.search_button.way_button_click()
+        self.page.search_bar.way_button_click()
 
     def test_search_good_date_input(self):
         """Тест Кейс1:
@@ -28,7 +28,7 @@ class FiveTestsCases(TestCase):
         from_obj = "Площадь Кирова"
         to_obj = "Версаль"
         self.page.search_way_panel.search(from_obj, to_obj)
-        self.assertTrue(from_obj and to_obj in self.page.result_list.public_transport_result_list_text())
+        self.assertTrue(from_obj and to_obj in self.page.result_list.public_transport_text())
 
     def test_search_bad_date_input(self):
         """Тест Кейс2:
@@ -47,7 +47,7 @@ class FiveTestsCases(TestCase):
         from_obj = "алллаитл"
         to_obj = "лрдод"
         self.page.search_way_panel.search(from_obj, to_obj)
-        self.assertTrue(self.page.no_results_list.no_results_list_displayed())
+        self.assertTrue(self.page.result_list.no_results_displayed())
 
     def test_search_map_click_date_input(self):
         """Тест Кейс3:
@@ -65,8 +65,8 @@ class FiveTestsCases(TestCase):
         """
         from_obj = "//img[@src='http://tile0.maps.2gis.com/tiles?x=47857&y=20719&z=16&v=1']"
         to_obj = "//img[@src='http://tile2.maps.2gis.com/tiles?x=47858&y=20720&z=16&v=1']"
-        self.page.zoom_panel.map_zoom_plus_click(5)
-        self.page.map.map_search(from_obj, to_obj)
+        self.page.zoom_panel.plus_click(5)
+        self.page.map.search(from_obj, to_obj)
         self.assertTrue(self.page.search_result_map.path_is_displayed())
 
     def test_search_from_different_objects(self):
@@ -86,9 +86,9 @@ class FiveTestsCases(TestCase):
         """
         from_obj = "Виктора Уса 9"
         to_obj = "Телецентр Остановка"
-        self.page.transport_panel.car_button_click()
+        self.page.search_way_panel.transport_button_car_click()
         self.page.search_way_panel.search(from_obj, to_obj)
-        self.assertTrue(from_obj and to_obj in self.page.car_result_list.car_result_list_text())
+        self.assertTrue(from_obj and to_obj in self.page.result_list.auto_text())
 
     def test_search_subway_option(self):
         """Тест Кейс5:
@@ -107,9 +107,9 @@ class FiveTestsCases(TestCase):
         """
         from_obj = "Студенческая"
         to_obj = "Площадь Маркса"
-        self.page.transport_panel.subway_button_click()
+        self.page.search_way_panel.transport_button_subway_click()
         self.page.search_way_panel.search(from_obj, to_obj)
-        self.assertTrue(from_obj and to_obj in self.page.result_list.public_transport_result_list_text())
+        self.assertTrue(from_obj and to_obj in self.page.result_list.public_transport_text())
 
     def tearDown(self):
         self.driver.quit()

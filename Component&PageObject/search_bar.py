@@ -1,10 +1,10 @@
 from base_component import BaseComponent
 
 
-class SearchButton(BaseComponent):
+class SearchBar(BaseComponent):
 
     selectors = {
-        'self': ".searchBar__buttons",
+        'self': ".searchBar",
         'way_button': "searchBar__buttons"
     }
 
