@@ -31,5 +31,13 @@ class PageRequests:
     def open(self, url):
         self.driver.get(url)
 
+    def get_request_params(self, num):
+        self.drops_management_grid.show_request(num)
+        name = self.create_edit_form.get_name()
+        period = self.create_edit_form.get_after_deadline_download_period()
+        print(period)
+        self.create_edit_form.close()
+        return name, period
+
     def refresh(self):
         self.driver.refresh()

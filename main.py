@@ -1,9 +1,8 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from unittest import TestCase
 import unittest
+from unittest import TestCase
 
-from CreateEditForm import CreateEditForm
+from selenium import webdriver
+
 from PageLogin import PageLogin
 from PageRequests import PageRequests
 
@@ -35,8 +34,10 @@ class Test(TestCase):
         """
 
         page = PageRequests(self.driver)
+
         page.drops_management_grid.create_request()
         page.create_edit_form.next_step()
+
         error_msg = page.create_edit_form.get_error()
         self.assertEqual("Введите тему вашего запроса файла.", error_msg)
 
@@ -51,15 +52,15 @@ class Test(TestCase):
             Создан запрос с обрезанным наименованием до 140 символов
         """
 
-        name = "a" * 141;
+        name = "a" * 141
         page = PageRequests(self.driver)
+
         page.drops_management_grid.create_request()
-        page.create_edit_form.set_name(name)
-        page.create_edit_form.next_step()
+        page.create_edit_form.fill_form(name)
         page.share_request_form.done()
+
         page.refresh()
-        page.drops_management_grid.show_request(0)
-        name_request = page.create_edit_form.get_name()
+        name_request = page.get_request_params(0)[0]
         self.assertEqual(name[:140], name_request)
 
     def test_unresolved_symbol_name(self):
@@ -75,8 +76,10 @@ class Test(TestCase):
 
         name = "test/test"
         page = PageRequests(self.driver)
+
         page.drops_management_grid.create_request()
         page.create_edit_form.set_name(name)
+
         error_msg = page.create_edit_form.get_error()
         self.assertEqual("В названиях запрещено использовать косую черточку (/). Пожалуйста, выберите другое название.",
                          error_msg)
@@ -95,19 +98,17 @@ class Test(TestCase):
         """
 
         name = "TEST2"
+        period = "Никогда"
         page = PageRequests(self.driver)
+
         page.drops_management_grid.create_request()
-        page.create_edit_form.set_name(name)
-        page.create_edit_form.set_deadline_flag(True)
-        page.create_edit_form.set_after_deadline_download_period("Никогда")
-        page.create_edit_form.next_step()
+        page.create_edit_form.fill_form(name, period)
         page.share_request_form.done()
+
         page.refresh()
-        page.drops_management_grid.show_request(0)
-        name_request = page.create_edit_form.get_name()
-        displayed = page.create_edit_form.is_displayed_after_deadline_upload_link()
+        name_request, period = page.get_request_params(0)
         self.assertEqual(name, name_request)
-        self.assertTrue(displayed)
+        self.assertIsNone(period)
 
     def test_overdue_downloads_notnever(self):
         """
@@ -123,17 +124,15 @@ class Test(TestCase):
         """
 
         name = "TEST3"
+        period = "В течении одного дня"
         page = PageRequests(self.driver)
+
         page.drops_management_grid.create_request()
-        page.create_edit_form.set_name(name)
-        page.create_edit_form.set_deadline_flag(True)
-        page.create_edit_form.set_after_deadline_download_period("В течении одного дня")
-        page.create_edit_form.next_step()
+        page.create_edit_form.fill_form(name, period)
         page.share_request_form.done()
+
         page.refresh()
-        page.drops_management_grid.show_request(0)
-        name_request = page.create_edit_form.get_name()
-        period = page.create_edit_form.get_after_deadline_download_period()
+        name_request, period = page.get_request_params(0)
         self.assertEqual(name, name_request)
         self.assertEqual("В течении одного дня", period)
 
