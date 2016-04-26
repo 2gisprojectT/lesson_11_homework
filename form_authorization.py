@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
 
-class FormAuthorization(BaseComponent):
+class AuthorizationForm(BaseComponent):
     id = {'login': 'input_auth_email',
           'pass': 'input_auth_pas',
           'email':'input_remind_email',

@@ -39,7 +39,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.forgot_password("lllll@mail.ru")
 
-        error = page_auth._form_authorization.get_error_message_incorrect_email()
+        error = page_auth.authorization_form.get_error_message_incorrect_email()
         self.assertIn("Пользователя с таким email не существует", error)
 
     def test_forgot_password_correct_email(self):
@@ -55,7 +55,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.forgot_password("ld040994@mail.ru")
 
-        message = page_auth._form_authorization.message_sending_new_pass_is_displayed()
+        message = page_auth.authorization_form.message_sending_new_pass_is_displayed()
         self.assertTrue(message)
 
     def test_auth_incorrect_login(self):
@@ -71,7 +71,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.authorization("l040994@mail.ru","040994alex")
 
-        error = page_auth._form_authorization.get_error_message_incorrect_login()
+        error = page_auth.authorization_form.get_error_message_incorrect_login()
         self.assertIn("Неправильный пароль или почта", error)
 
     def test_auth_correct(self):
