@@ -67,10 +67,10 @@ class RightWork(TestCase):
             Поле "Личный кабинет" замениться на идентификаторы пользователя из выбранной соц. сети
             """
         autorization = self.page.autorize
-        autorization.personal_area_click()
-        autorization.twitt_logo_click()
-        autorization.input_inf('fedosovdn@mail.ru', 'ltdrbcexrb')
-        autorization.check_name('fedosov0405')
+        autorization.personal_area_open()
+        autorization.twitt_autor_open()
+        autorization.twitt_input_inf('fedosovdn@mail.ru', 'ltdrbcexrb')
+        autorization.twitt_check_name('fedosov0405')
 
     def test_wrong_registration(self):
         """
@@ -84,8 +84,9 @@ class RightWork(TestCase):
             Окно регистрации активно(регистрация не прошла)
             """
         registration = self.page.autorize
-        registration.personal_area_click()
+        registration.personal_area_open()
         registration.input_reg_inf('fedosovdn@mail.ru', 'bla_bla', 'bla_bla_bla')
+        registration.finish_reg()
         self.assertTrue(registration.active_form)
 
     def test_baby(self):

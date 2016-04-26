@@ -16,16 +16,17 @@ class PersonalArea(BaseComponent):
         'reg_email': '#input_reg_email',
         'reg_pass': '#input_reg_pas',
         'repeat_pass': '#input_confirmreg_pas',
+        'reg_button': '//*[@id="SocialReg"]/div[4]/button',
         'reg_form': '//*[@id="SocialRegAuth"]'
     }
 
-    def personal_area_click(self):
+    def personal_area_open(self):
         self.driver.find_element_by_css_selector(self.selectors['enter']).click()
 
-    def twitt_logo_click(self):
+    def twitt_autor_open(self):
         self.driver.find_element_by_xpath(self.selectors['twit']).click()
 
-    def input_inf(self, name, password):
+    def twitt_input_inf(self, name, password):
         self.driver.switch_to_window(self.driver.window_handles[1])
         elem = self.driver.find_element_by_css_selector(self.selectors['log'])
         elem.send_keys(name)
@@ -34,7 +35,7 @@ class PersonalArea(BaseComponent):
         self.driver.find_element_by_css_selector(self.selectors['ok']).click()
         self.driver.switch_to_window(self.driver.window_handles[0])
 
-    def check_name(self, name):
+    def twitt_check_name(self, name):
         self.wait = WebDriverWait(self.driver, 10)
         self.wait.until(
             EC.text_to_be_present_in_element((By.CLASS_NAME, self.selectors['myprof']), name))
@@ -46,7 +47,9 @@ class PersonalArea(BaseComponent):
         elem.send_keys(password1)
         elem = self.driver.find_element_by_css_selector(self.selectors['repeat_pass'])
         elem.send_keys(password2)
-        elem.send_keys(Keys.TAB, Keys.ENTER)
+
+    def finish_reg(self):
+        self.driver.find_element_by_xpath(self.selectors['reg_button'])
 
     @property
     def active_form(self):
