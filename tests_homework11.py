@@ -31,7 +31,7 @@ class OneTwoTripTests(unittest.TestCase):
         page_auth = UserAuthPage(self.driver)
 
         page_auth.user_auth.authorization("antonprojectt@leeching.net", "abcd123")
-        error_info = page_auth.user_auth.get_error()
+        error_info = page_auth.user_auth.get_error_auth()
         self.assertEqual(error_info, "Неправильный пароль или почта")
 
     def test_twitter_authorization(self):
@@ -64,8 +64,8 @@ class OneTwoTripTests(unittest.TestCase):
         passenger_info = ("IVANOV", "IVAN", "12.12.2016", "123QWE", "12.12.2100")
 
         page_user_info.user_info.authorization_and_go_to_profile("antonprojectt@leeching.net", "test009")
-        page_user_info.user_info.add_passenger(passenger_info)
-        result = page_user_info.user_info.get_passenger_info()
+        page_user_info.passenger_info.add_passenger(passenger_info)
+        result = page_user_info.passenger_info.get_passenger_info()
 
         self.assertEqual(result[0], passenger_info[0])
         self.assertEqual(result[1], passenger_info[1])
@@ -110,10 +110,10 @@ class OneTwoTripTests(unittest.TestCase):
         page_user_info.user_info.authorization_and_go_to_profile("antonprojectt@leeching.net", "test009")
         page_user_info.user_info.change_password("test123")
 
-        info_field = page_user_info.user_info.get_element()
+        info_field = page_user_info.user_info.is_displayed_to_the_user()
         result = page_user_info.user_info.get_change_password_info()
 
-        self.assertTrue(info_field.is_displayed())
+        self.assertTrue(info_field)
         self.assertEqual(result, "Изменение пароля")
 
     def tearDown(self):
