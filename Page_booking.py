@@ -3,7 +3,7 @@ class PageBooking():
 
         self.driver = driver
         self.passenger_inf = None
-        self.choice_flight = None
+        self.flight = None
 
     @property
     def inf_about_passenger(self):
@@ -14,12 +14,12 @@ class PageBooking():
         return self.passenger_inf
 
     @property
-    def choose_flight(self):
+    def selected_flight(self):
         from Flight import Flight
 
-        if self.choice_flight is None:
-            self.choice_flight = Flight(self.driver)
-        return self.choice_flight
+        if self.flight is None:
+            self.flight = Flight(self.driver)
+        return self.flight
 
     def open(self, url):
         self.driver.get(url)

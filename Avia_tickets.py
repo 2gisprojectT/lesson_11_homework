@@ -15,16 +15,16 @@ class InfoAboutFlight(BaseComponent):
         'error': '.comment > p:nth-child(1)'
     }
 
-    def from_to(self, _from, _to):
+    def set_cities_from_to(self, _from, _to):
         elem = self.driver.find_element_by_css_selector(self.selectors['from'])
         elem.send_keys(_from)
         elem = self.driver.find_element_by_css_selector(self.selectors['to'])
         elem.send_keys(_to)
 
-    def date_to(self):
+    def set_date_to(self):
         self.driver.find_element_by_xpath(self.selectors['date0']).click()
 
-    def date_back(self):
+    def set_date_back(self):
         self.driver.find_element_by_xpath(self.selectors['button_date_back']).click()
         self.driver.find_element_by_xpath(self.selectors['date1']).click()
 
@@ -34,7 +34,7 @@ class InfoAboutFlight(BaseComponent):
     def select_one_direction(self):
         self.driver.find_element_by_css_selector(self.selectors['one_direction']).click()
 
-    def button_find(self):
+    def button_search(self):
         self.driver.find_element_by_css_selector(self.selectors['button_find']).click()
 
     @property

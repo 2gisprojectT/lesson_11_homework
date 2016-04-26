@@ -31,9 +31,9 @@ class RightWork(TestCase):
          """
         flight_info = self.page.inf_about_flight
         flight_info.select_one_direction()
-        flight_info.from_to('Новосибирск', 'Новосибирск')
-        flight_info.date_to()
-        flight_info.button_find()
+        flight_info.set_cities_from_to('Новосибирск', 'Новосибирск')
+        flight_info.set_date_to()
+        flight_info.button_search()
         self.assertEqual(flight_info.error, 'Неверно задан маршрут. Совпадают пункты вылета и прилёта.')
 
     def test_wrong_dates(self):
@@ -50,10 +50,10 @@ class RightWork(TestCase):
             """
         flight_info = self.page.inf_about_flight
         flight_info.select_two_directions()
-        flight_info.from_to('Новосибирск','Екатеринбург')
-        flight_info.date_to()
-        flight_info.date_back()
-        flight_info.button_find()
+        flight_info.set_cities_from_to('Новосибирск','Екатеринбург')
+        flight_info.set_date_to()
+        flight_info.set_date_back()
+        flight_info.button_search()
         self.assertEqual(flight_info.error, 'Неверно заданы даты')
 
     def test_autorization(self):
@@ -67,8 +67,8 @@ class RightWork(TestCase):
             Поле "Личный кабинет" замениться на идентификаторы пользователя из выбранной соц. сети
             """
         autorization = self.page.autorize
-        autorization.personal_area()
-        autorization.twitt_logo()
+        autorization.personal_area_click()
+        autorization.twitt_logo_click()
         autorization.input_inf('fedosovdn@mail.ru', 'ltdrbcexrb')
         autorization.check_name('fedosov0405')
 
@@ -84,8 +84,8 @@ class RightWork(TestCase):
             Окно регистрации активно(регистрация не прошла)
             """
         registration = self.page.autorize
-        registration.personal_area()
-        registration.input_reg('fedosovdn@mail.ru', 'bla_bla', 'bla_bla_bla')
+        registration.personal_area_click()
+        registration.input_reg_inf('fedosovdn@mail.ru', 'bla_bla', 'bla_bla_bla')
         self.assertTrue(registration.active_form)
 
     def test_baby(self):
@@ -104,13 +104,13 @@ class RightWork(TestCase):
                 """
         flight_info = self.page.inf_about_flight
         flight_info.select_one_direction()
-        flight_info.from_to('Новосибирск', 'Екатеринбург')
-        flight_info.date_to()
-        flight_info.button_find()
+        flight_info.set_cities_from_to('Новосибирск', 'Екатеринбург')
+        flight_info.set_date_to()
+        flight_info.button_search()
 
         self.page_booking = PageBooking(self.driver)
-        choice_flight = self.page_booking.choose_flight
-        choice_flight.select_flight()
+        flight = self.page_booking.selected_flight
+        flight.select_flight()
         passenger = self.page_booking.inf_about_passenger
-        passenger.passenger_inf('jsmith@mail.ru','Jonh','Smith','2849729785')
+        passenger.set_passenger_inf('jsmith@mail.ru','Jonh','Smith','2849729785')
         self.assertEqual(passenger.error, 'Количество младенцев в брони не должно превышать количество взрослых.')

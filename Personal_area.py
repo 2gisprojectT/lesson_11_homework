@@ -19,10 +19,10 @@ class PersonalArea(BaseComponent):
         'reg_form': '//*[@id="SocialRegAuth"]'
     }
 
-    def personal_area(self):
+    def personal_area_click(self):
         self.driver.find_element_by_css_selector(self.selectors['enter']).click()
 
-    def twitt_logo(self):
+    def twitt_logo_click(self):
         self.driver.find_element_by_xpath(self.selectors['twit']).click()
 
     def input_inf(self, name, password):
@@ -39,7 +39,7 @@ class PersonalArea(BaseComponent):
         self.wait.until(
             EC.text_to_be_present_in_element((By.CLASS_NAME, self.selectors['myprof']), name))
 
-    def input_reg(self, name, password1, password2):
+    def input_reg_inf(self, name, password1, password2):
         elem = self.driver.find_element_by_css_selector(self.selectors['reg_email'])
         elem.send_keys(name)
         elem = self.driver.find_element_by_css_selector(self.selectors['reg_pass'])

@@ -11,7 +11,7 @@ class Passenger(BaseComponent):
         'error': '.comment > p:nth-child(1)'
     }
 
-    def passenger_inf(self, email, lastname, firstName, passport):
+    def set_passenger_inf(self, email, lastname, firstName, passport):
         elem = self.driver.find_element_by_css_selector(self.selectors['email'])
         elem.send_keys(email)
         elem = self.driver.find_element_by_css_selector(self.selectors['lastname'])
