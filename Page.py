@@ -5,7 +5,7 @@ class PageLogin():
         self.authorization_form = None
 
     @property
-    def form_auth(self):
+    def auth_form(self):
         from form_authorization import AuthorizationForm
 
         if self.authorization_form is None:
