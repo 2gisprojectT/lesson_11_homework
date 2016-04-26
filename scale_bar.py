@@ -1,4 +1,4 @@
-from page import Page
+from map import Map
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -21,4 +21,4 @@ class ScaleBar(BaseComponent):
                 EC.presence_of_element_located((By.CLASS_NAME, 'map')))
             self.driver.find_element_by_css_selector(self.selectors['increase']).click()
             count -= 1
-            Page.scale += 1
+            Map.scale += 1

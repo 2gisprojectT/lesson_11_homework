@@ -26,7 +26,7 @@ class GeoCard(BaseComponent):
     def address_link(self):
         WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, self.selectors['title'])))
-        return self.driver.find_element_by_css_selector(self.selectors['address_link'])
+        return self.driver.find_element_by_css_selector(self.selectors['address_link']).text
 
     def photos(self):
         self.driver.find_element_by_css_selector(self.selectors['photos']).click()

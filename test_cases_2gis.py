@@ -65,7 +65,7 @@ class SiteTestCase(TestCase):
         click_object_text = self.page.geo_card.title
 
         self.page.search_bar.search('Оперный театр')
-        self.page.search_result.first_result.click()
+        self.page.search_result.first_result()
 
         self.assertEqual(('' + click_object_text).lower(), ('' + self.page.firm_card.title).lower())
 
@@ -99,7 +99,7 @@ class SiteTestCase(TestCase):
         """
         self.page.scale_bar.increase(4)
         self.page.map.click('Оперный театр')
-        address = self.page.geo_card.address_link.text
+        address = self.page.geo_card.address_link
         self.page.geo_card.photos()
 
         self.assertEqual(address, self.page.gallery_card.title)

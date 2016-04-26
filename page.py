@@ -12,8 +12,6 @@ class Page:
         self._metro_card = None
         self._gallery_card = None
 
-    scale = 1
-
     @property
     def map(self):
         from map import Map
