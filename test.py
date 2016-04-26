@@ -30,18 +30,16 @@ class OttripTest(TestCase):
         """
         Тест-кейс "Проверка вывода сообщения об ошибке при вводе несуществующего email в форме "забыли пароль""
         Шаги:
-        1. Зайти на сайт "www.onetwotrip.com"
-        2. Нажать "Личный кабинет"
-        3. В открывшемся окне нажимаем "забыли пароль"
-        4. В открывшемся окне ввести несуществующий email
+        1. Нажать "забыли пароль"
+        2. В поле "Электронная почта" ввести несуществующий email
+        3. Нажать кнопку "Получить пароль"
         Ожидание:
         Вывод сообщения об ошибке "Пользователя с таким email не существует" в браузере.
         """
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.forgot_password("lllll@mail.ru")
 
-        error = page_auth.result_forgot_pass.get_error_message_incorrect_email()
-
+        error = page_auth.result_forgot_pass.get_error_message()
         self.assertIn("Пользователя с таким email не существует", error)
 
     def test_forgot_password_correct_email(self):
@@ -73,8 +71,7 @@ class OttripTest(TestCase):
         page_auth = PageLogin(self.driver)
         page_auth.form_auth.authorization("l040994@mail.ru","040994alex")
 
-        error = page_auth.result_auth.get_error_message_incorrect_login()
-
+        error = page_auth.result_auth.get_error_message()
         self.assertIn("Неправильный пароль или почта", error)
 
     def test_auth_correct(self):

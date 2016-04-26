@@ -16,7 +16,7 @@ class AuthResult(BaseComponent):
             EC.visibility_of_element_located((By.CLASS_NAME, self.class_name['name_profile'])))
         return self.driver.find_element_by_class_name(self.class_name['name_profile']).text
 
-    def get_error_message_incorrect_login(self):
+    def get_error_message(self):
         WebDriverWait(self.driver, 5).until(
             EC.visibility_of_element_located((By.CLASS_NAME, self.class_name['error_message'])))
         return self.driver.find_element_by_class_name(self.class_name['error_message']).text

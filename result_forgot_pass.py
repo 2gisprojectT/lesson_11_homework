@@ -12,7 +12,7 @@ class ForgotPassResult(BaseComponent):
         'mes_sending_new_pass': 'smallText'
     }
 
-    def get_error_message_incorrect_email(self):
+    def get_error_message(self):
         WebDriverWait(self.driver, 5).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, self.selectors['mes_incorrect_email'])))
         return self.driver.find_element_by_css_selector(self.selectors['mes_incorrect_email']).text
