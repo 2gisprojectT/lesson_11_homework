@@ -4,14 +4,14 @@ from unittest import TestCase
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 
-from LogInPage import LoginPage
+from auth_page import Page
 
 
 class TestGmailAuth(TestCase):
     def setUp(self):
         self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(5)
-        self.page = LoginPage(self.driver)
+        self.page = Page(self.driver)
         self.page.open("https://mail.google.com/")
 
     def wait_captcha_img(self, email):
@@ -53,8 +53,9 @@ class TestGmailAuth(TestCase):
 
             """
 
-        self.page.login_form().enter_email("sss354rfds")
-        self.assertEqual(self.page.login_form.get_error(), "Не удалось распознать адрес электронной почты.")
+        a = Page(self.driver)
+        a.email_form.enter_email("qewdasafdwqas341r")
+        self.assertEqual(a.email_form.get_error(), "Не удалось распознать адрес электронной почты.")
 
     def test_not_valid_email(self):
         """
@@ -68,12 +69,10 @@ class TestGmailAuth(TestCase):
             Появляется сообщение : "Введите адрес электронной почты."
 
             """
-        driver = self.driver
-        email = driver.find_element_by_name("Email")
-        email.send_keys("sndb11@")
-        email.submit()
-        error = driver.find_element_by_css_selector(".has-error .error-msg").text
-        self.assertEqual(error, "Введите адрес электронной почты.")
+
+        a = Page(self.driver)
+        a.email_form.enter_email("sndb11@")
+        self.assertEqual(a.email_form.get_error(), "Введите адрес электронной почты.")
 
     def test_long_email(self):
         """
@@ -87,13 +86,10 @@ class TestGmailAuth(TestCase):
             Появляется сообщение : "Слишком длинный адрес электронной почты."
 
             """
-        driver = self.driver
-        email = driver.find_element_by_name("Email")
         key = "a" * 201
-        email.send_keys(key)
-        email.submit()
-        error = driver.find_element_by_css_selector(".has-error .error-msg").text
-        self.assertEqual(error, "Слишком длинный адрес электронной почты.")
+        page = Page(self.driver)
+        page.email_form.enter_email(key)
+        self.assertEqual(page.email_form.get_error(), "Слишком длинный адрес электронной почты.")
 
     def test_long_passwd(self):
         """
@@ -107,16 +103,11 @@ class TestGmailAuth(TestCase):
             Появляется сообщение : "Должно быть не более 200 символов"
 
             """
-        driver = self.driver
-        email = driver.find_element_by_name("Email")
-        email.send_keys("doctorvra4@gmail.com")
-        email.submit()
+        page = Page(self.driver)
+        page.email_form.enter_email("doctorvra4@gmail.com")
         key = "a" * 201
-        passwd = self.driver.find_element_by_name("Passwd")
-        passwd.send_keys(key)
-        passwd.submit()
-        error = driver.find_element_by_id("errormsg_0_Passwd").text
-        self.assertEqual(error, "Должно быть не более 200 символов")
+        page.passwd_form.enter_passw(key)
+        self.assertEqual(page.passwd_form.get_error(), "Должно быть не более 200 символов")
 
     def tearDown(self):
         self.driver.quit()
