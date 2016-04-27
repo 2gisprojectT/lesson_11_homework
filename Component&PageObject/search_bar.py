@@ -8,5 +8,5 @@ class SearchBar(BaseComponent):
         'way_button': "searchBar__buttons"
     }
 
-    def click_button_passage(self):
+    def select_passage(self):
         self.driver.find_element_by_class_name(self.selectors['way_button']).click()

@@ -18,11 +18,11 @@ class SearchPassageBar(BaseComponent):
         self.driver.find_element_by_css_selector(self.selectors['to_field']).send_keys(obj2)
         self.driver.find_element_by_css_selector(self.selectors['to_field']).submit()
 
-    def click_button_car_route(self):
+    def select_car_route(self):
         self.driver.find_element_by_css_selector(self.selectors['transport_button_car']).click()
 
-    def click_button_public_transport(self):
+    def select_public_transport(self):
         self.driver.find_element_by_css_selector(self.selectors['transport_button_public']).click()
 
-    def click_button_subway(self):
+    def select_subway(self):
         self.driver.find_element_by_css_selector(self.selectors['transport_button_subway']).click()

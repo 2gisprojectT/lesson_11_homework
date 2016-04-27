@@ -11,7 +11,7 @@ class ZoomPanel(BaseComponent):
         'zoom_button': "div[class='zoom__button _type_in']"
     }
 
-    def click_plus(self, value):
+    def zoom(self, value):
         zoom_button = self.driver.find_element_by_css_selector(self.selectors['zoom_button'])
         while value > 0:
             WebDriverWait(self.driver, value).until(EC.element_to_be_clickable((By.CLASS_NAME, 'map')))

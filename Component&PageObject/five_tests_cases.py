@@ -10,7 +10,7 @@ class FiveTestsCases(TestCase):
         self.driver.implicitly_wait(5)
         self.page = PageObjects(self.driver)
         self.page.open('http://2gis.ru/novosibirsk')
-        self.page.search_bar.click_button_passage()
+        self.page.search_bar.select_passage()
 
     def test_search_good_date_input(self):
         """Тест Кейс1:
@@ -67,7 +67,7 @@ class FiveTestsCases(TestCase):
         """
         from_obj = "//img[@src='http://tile0.maps.2gis.com/tiles?x=47857&y=20719&z=16&v=1']"
         to_obj = "//img[@src='http://tile2.maps.2gis.com/tiles?x=47858&y=20720&z=16&v=1']"
-        self.page.zoom_panel.click_plus(5)
+        self.page.zoom_panel.zoom(5)
         self.page.map.search_passage_by_clicking_on_objects(from_obj, to_obj)
         passage_on_map_is_displayed = self.page.result_search_on_map.check_passage_is_displayed()
         self.assertTrue(passage_on_map_is_displayed)
@@ -89,7 +89,7 @@ class FiveTestsCases(TestCase):
         """
         from_obj = "Виктора Уса 9"
         to_obj = "Телецентр Остановка"
-        self.page.search_passage_bar.click_button_car_route()
+        self.page.search_passage_bar.select_car_route()
         self.page.search_passage_bar.search(from_obj, to_obj)
         frame_result_text = self.page.frame_result_search_passage.get_auto_transport_text()
         self.assertTrue(from_obj and to_obj in frame_result_text)
@@ -111,7 +111,7 @@ class FiveTestsCases(TestCase):
         """
         from_obj = "Студенческая"
         to_obj = "Площадь Маркса"
-        self.page.search_passage_bar.click_button_subway()
+        self.page.search_passage_bar.select_subway()
         self.page.search_passage_bar.search(from_obj, to_obj)
         frame_result_text = self.page.frame_result_search_passage.get_public_transport_text()
         self.assertTrue(from_obj and to_obj in frame_result_text)
