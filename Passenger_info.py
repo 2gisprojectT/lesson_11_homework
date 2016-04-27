@@ -8,7 +8,8 @@ class Passenger(BaseComponent):
         'lastname': '#input_lastName0',
         'firstname': '#input_firstName0',
         'passport': '#input_passNumber0',
-        'error': '.comment > p:nth-child(1)'
+        'error': '.comment > p:nth-child(1)',
+        'go_on': '//*[@id="popup_passengerSelect"]/form/div[2]/div[9]/button'
     }
 
     def set_passenger_inf(self, email, lastname, firstName, passport):
@@ -22,7 +23,9 @@ class Passenger(BaseComponent):
                        Keys.NUMPAD1, Keys.NUMPAD6)
         elem = self.driver.find_element_by_css_selector(self.selectors['passport'])
         elem.send_keys(passport)
-        elem.send_keys(Keys.TAB, Keys.ENTER)
+
+    def next_step(self):
+        self.driver.find_element_by_xpath(self.selectors['go_on']).click()
 
     @property
     def error(self):

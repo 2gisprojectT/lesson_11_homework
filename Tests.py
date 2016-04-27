@@ -33,7 +33,7 @@ class RightWork(TestCase):
         flight_info.select_one_direction()
         flight_info.set_cities_from_to('Новосибирск', 'Новосибирск')
         flight_info.set_date_to()
-        flight_info.button_search()
+        flight_info.search()
         self.assertEqual(flight_info.error, 'Неверно задан маршрут. Совпадают пункты вылета и прилёта.')
 
     def test_wrong_dates(self):
@@ -53,7 +53,7 @@ class RightWork(TestCase):
         flight_info.set_cities_from_to('Новосибирск','Екатеринбург')
         flight_info.set_date_to()
         flight_info.set_date_back()
-        flight_info.button_search()
+        flight_info.search()
         self.assertEqual(flight_info.error, 'Неверно заданы даты')
 
     def test_autorization(self):
@@ -97,8 +97,9 @@ class RightWork(TestCase):
                 3. В поле "Когда" выставить любую дату
                 4. Нажать кнопку "Найти"
                 ________________________________________________________
-                5. Открыть первый вариант рейса
-    	        6. Вводим информацию пассажира (дата рожения: 04.04.2016), нажимаем alt+enter
+                5. Выбрать первый вариант рейса
+    	        6. Вводим информацию пассажира (дата рожения: 04.04.2016)
+    	        7. Нажать кнопку "Продолжить"
 
                 Проверка:
                 Появляется сообщение "Количество младенцев в брони не должно превышать количество взрослых."
@@ -107,11 +108,12 @@ class RightWork(TestCase):
         flight_info.select_one_direction()
         flight_info.set_cities_from_to('Новосибирск', 'Екатеринбург')
         flight_info.set_date_to()
-        flight_info.button_search()
+        flight_info.search()
 
         self.page_booking = PageBooking(self.driver)
         flight = self.page_booking.selected_flight
         flight.select_flight()
         passenger = self.page_booking.inf_about_passenger
         passenger.set_passenger_inf('jsmith@mail.ru','Jonh','Smith','2849729785')
+        passenger.next_step()
         self.assertEqual(passenger.error, 'Количество младенцев в брони не должно превышать количество взрослых.')

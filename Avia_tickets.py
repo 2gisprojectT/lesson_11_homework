@@ -34,7 +34,7 @@ class InfoAboutFlight(BaseComponent):
     def select_one_direction(self):
         self.driver.find_element_by_css_selector(self.selectors['one_direction']).click()
 
-    def button_search(self):
+    def search(self):
         self.driver.find_element_by_css_selector(self.selectors['button_find']).click()
 
     @property
