@@ -1,7 +1,7 @@
 from base_component import BaseComponent
 
 
-class SearchWayPanel(BaseComponent):
+class SearchPassageBar(BaseComponent):
 
     selectors = {
         'self': ".searchBar__formsIn",
@@ -18,11 +18,11 @@ class SearchWayPanel(BaseComponent):
         self.driver.find_element_by_css_selector(self.selectors['to_field']).send_keys(obj2)
         self.driver.find_element_by_css_selector(self.selectors['to_field']).submit()
 
-    def transport_button_car_click(self):
+    def click_button_car_route(self):
         self.driver.find_element_by_css_selector(self.selectors['transport_button_car']).click()
 
-    def transport_button_public_click(self):
+    def click_button_public_transport(self):
         self.driver.find_element_by_css_selector(self.selectors['transport_button_public']).click()
 
-    def transport_button_subway_click(self):
+    def click_button_subway(self):
         self.driver.find_element_by_css_selector(self.selectors['transport_button_subway']).click()

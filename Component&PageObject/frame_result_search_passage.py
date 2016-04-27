@@ -1,7 +1,7 @@
 from base_component import BaseComponent
 
 
-class SearchResultList(BaseComponent):
+class FrameResultSearchPassage(BaseComponent):
 
     selectors = {
         'self': '.dataViewer',
@@ -10,11 +10,11 @@ class SearchResultList(BaseComponent):
         'no_results_list': ".noResults__routeType"
     }
 
-    def public_transport_text(self):
+    def get_public_transport_text(self):
         return self.driver.find_element_by_css_selector(self.selectors['public_transport_result_list']).text
 
-    def no_results_displayed(self):
+    def check_no_results_is_displayed(self):
         return self.driver.find_element_by_css_selector(self.selectors['no_results_list']).is_displayed
 
-    def auto_text(self):
+    def get_auto_transport_text(self):
         return self.driver.find_element_by_css_selector(self.selectors['car_result_list']).text
