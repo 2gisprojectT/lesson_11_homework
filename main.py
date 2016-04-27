@@ -24,7 +24,8 @@ class TestGmailAuth(TestCase):
 
         """
         page = Page(self.driver)
-        page.email_form.throw_captcha()
+        result = page.email_form.stop_after_some_seconds(10)
+        self.assertTrue(result)
 
     def test_not_register_email(self):
         """
@@ -38,10 +39,10 @@ class TestGmailAuth(TestCase):
             Появляется сообщение : Не удалось распознать адрес электронной почты.
 
             """
-
         page = Page(self.driver)
         page.email_form.enter_email("qewdasafdwqas341r")
-        self.assertEqual(page.email_form.get_error(), "Не удалось распознать адрес электронной почты.")
+        error = page.email_form.get_error()
+        self.assertEqual(error, "Не удалось распознать адрес электронной почты.")
 
     def test_not_valid_email(self):
         """
@@ -55,10 +56,10 @@ class TestGmailAuth(TestCase):
             Появляется сообщение : "Введите адрес электронной почты."
 
             """
-
         page = Page(self.driver)
         page.email_form.enter_email("sndb11@")
-        self.assertEqual(page.email_form.get_error(), "Введите адрес электронной почты.")
+        error = page.email_form.get_error()
+        self.assertEqual(error, "Введите адрес электронной почты.")
 
     def test_long_email(self):
         """
@@ -75,7 +76,8 @@ class TestGmailAuth(TestCase):
         key = "a" * 201
         page = Page(self.driver)
         page.email_form.enter_email(key)
-        self.assertEqual(page.email_form.get_error(), "Слишком длинный адрес электронной почты.")
+        error = page.email_form.get_error()
+        self.assertEqual(error, "Слишком длинный адрес электронной почты.")
 
     def test_long_passwd(self):
         """
@@ -93,7 +95,8 @@ class TestGmailAuth(TestCase):
         page.email_form.enter_email("doctorvra4@gmail.com")
         key = "a" * 201
         page.passwd_form.enter_passw(key)
-        self.assertEqual(page.passwd_form.get_error(), "Должно быть не более 200 символов")
+        error = page.passwd_form.get_error()
+        self.assertEqual(error, "Должно быть не более 200 символов")
 
     def tearDown(self):
         self.driver.quit()
