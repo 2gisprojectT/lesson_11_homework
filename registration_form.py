@@ -19,7 +19,7 @@ class RegistrationForm(BaseComponent):
             self.driver.find_element_by_css_selector(self.selectors['password']).send_keys(password)
             self.driver.find_element_by_css_selector(self.selectors['password']).submit()
 
-        def error_registration(self):
+        def get_error_message(self):
             return self.driver.find_element_by_class_name(self.selectors['error_message']).text
 
         def go_to_sign_in(self):
