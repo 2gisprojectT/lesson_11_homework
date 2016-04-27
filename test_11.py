@@ -32,7 +32,7 @@ class SeleniumTest(TestCase):
         """
         page = RegisterPage(self.driver)
         page.registration_form.registration('a'*105, "projectt@mail.ru", "password")
-        error_message = page.registration_form.error_registration()
+        error_message = page.registration_form.get_error_message()
         self.assertEqual(error_message, "Введите значение: менее 100 символов.")
 
     def test_hint_easy_password(self):
