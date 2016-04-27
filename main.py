@@ -4,14 +4,17 @@ from unittest import TestCase
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 
+from LogInPage import LoginPage
+
 
 class TestGmailAuth(TestCase):
     def setUp(self):
         self.driver = webdriver.Firefox()
-        self.driver.get("https://mail.google.com/")
         self.driver.implicitly_wait(5)
+        self.page = LoginPage(self.driver)
+        self.page.open("https://mail.google.com/")
 
-    def wait_captcha_img(self,email):
+    def wait_captcha_img(self, email):
         captcha = self.driver.find_element_by_id("captcha-img")
         while (True):
             email.send_keys("a")
@@ -49,12 +52,9 @@ class TestGmailAuth(TestCase):
             Появляется сообщение : Не удалось распознать адрес электронной почты.
 
             """
-        driver = self.driver
-        email = driver.find_element_by_name("Email")
-        email.send_keys("sndb11")
-        email.submit()
-        error = driver.find_element_by_css_selector(".has-error .error-msg")
-        self.assertEqual(error.text, "Не удалось распознать адрес электронной почты.")
+
+        self.page.login_form().enter_email("sss354rfds")
+        self.assertEqual(self.page.login_form.get_error(), "Не удалось распознать адрес электронной почты.")
 
     def test_not_valid_email(self):
         """
