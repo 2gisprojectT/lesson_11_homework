@@ -16,7 +16,7 @@ class MyTestCase(unittest.TestCase):
         self.page = Page(self.driver)
         self.page.open("https://mail.google.com")
         self.page.authorization.to_authorize("arch.step.inc@gmail.com", "TestinG1234")
-        self.page.button.click()
+        self.page.send_form.open_form()
 
     def test_all_filled_fields(self):
         """
@@ -28,9 +28,8 @@ class MyTestCase(unittest.TestCase):
         Ожидаемый результат:
         Форма отправки закроется, через некоторое время в центре экрана появится сообщение об успешной доставке
         """
-        self.page.send_form.fill_n_send("arch.step.inc@gmail.com", "Hello", "Hello")
-        mes = self.page.message_sending.check_success_message("Письмо отправлено. Просмотреть сообщение")
-        self.assertTrue(mes)
+        self.page.send_form.send_email("arch.step.inc@gmail.com", "Hello", "Hello")
+        self.page.message_sending.check_success_message("Письмо отправлено. Просмотреть сообщение")
 
     def test_no_theme(self):
         """
@@ -43,9 +42,8 @@ class MyTestCase(unittest.TestCase):
         Ожидаемый результат:
         Форма отправки закроется, через некоторое время в центре экрана появится сообщение об успешной доставке
         """
-        self.page.send_form.fill_n_send("arch.step.inc@gmail.com", "", "Hello")
-        mes = self.page.message_sending.check_success_message("Письмо отправлено. Просмотреть сообщение")
-        self.assertTrue(mes)
+        self.page.send_form.send_email("arch.step.inc@gmail.com", "", "Hello")
+        self.page.message_sending.check_success_message("Письмо отправлено. Просмотреть сообщение")
 
     def test_wrong_destination(self):
         """
@@ -57,9 +55,8 @@ class MyTestCase(unittest.TestCase):
         Ожидаемый результат:
         Появится сообщение об ошибке
         """
-        self.page.send_form.fill_n_send("курлык", "Hello", "Hello")
-        mes = self.page.message_sending.check_error_message("Адрес курлык в поле Кому не распознан. Проверьте правильность ввода всех адресов.")
-        self.assertTrue(mes)
+        self.page.send_form.send_email("курлык", "Hello", "Hello")
+        self.page.message_sending.check_error_message("Адрес курлык в поле Кому не распознан. Проверьте правильность ввода всех адресов.")
 
     def test_no_receivers(self):
         """
@@ -71,9 +68,8 @@ class MyTestCase(unittest.TestCase):
         Ожидаемый результат:
         Появится сообщение об ошибке
         """
-        self.page.send_form.fill_n_send("", "Hello", "Hello")
-        mes = self.page.message_sending.check_error_message("Укажите как минимум одного получателя.")
-        self.assertTrue(mes)
+        self.page.send_form.send_email("", "Hello", "Hello")
+        self.page.message_sending.check_error_message("Укажите как минимум одного получателя.")
 
     def test_dynamic_save(self):
         """
@@ -84,11 +80,9 @@ class MyTestCase(unittest.TestCase):
         Ожидаемый результат:
         В нижней части формы отправки справа появится надпись: "Идет сохранение", а затем: "Сохранено".
         """
-        self.page.send_form.fill_not_all()
-        mes = self.page.message_sending.check_save("Идет сохранение")
-        self.assertTrue(mes)
-        mes = self.page.message_sending.check_save("Сохранено")
-        self.assertTrue(mes)
+        self.page.send_form.fill_one_field("just one moment...")
+        self.page.message_sending.check_save("Идет сохранение")
+        self.page.message_sending.check_save("Сохранено")
 
     def tearDown(self):
         self.driver.quit()

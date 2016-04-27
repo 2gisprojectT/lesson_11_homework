@@ -1,17 +1,9 @@
 class Page:
     def __init__(self, driver):
         self.driver = driver
-        self._button = None
         self._send = None
         self._authorization = None
         self._message = None
-
-    @property
-    def button(self):
-        from element_button import Button
-        if self._button == None:
-            self._button = Button(self.driver)
-        return self._button
 
     @property
     def send_form(self):
