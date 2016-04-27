@@ -2,7 +2,6 @@ import unittest
 from unittest import TestCase
 
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
 
 from auth_page import Page
 
@@ -11,16 +10,7 @@ class TestGmailAuth(TestCase):
     def setUp(self):
         self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(5)
-        self.page = Page(self.driver)
-        self.page.open("https://mail.google.com/")
-
-    def wait_captcha_img(self, email):
-        captcha = self.driver.find_element_by_id("captcha-img")
-        while (True):
-            email.send_keys("a")
-            email.submit()
-            if (captcha.is_displayed()):
-                return True
+        Page(self.driver).open("https://mail.google.com/")
 
     def test_email_captcha(self):
         """
@@ -33,12 +23,8 @@ class TestGmailAuth(TestCase):
         Появляется поле ввода капчи
 
         """
-        driver = self.driver
-        email = driver.find_element_by_name("Email")
-        email.send_keys("sndb11")
-        WebDriverWait(driver, 10).until(
-            lambda s: self.wait_captcha_img(email)
-        )
+        page = Page(self.driver)
+        page.email_form.throw_captcha()
 
     def test_not_register_email(self):
         """
@@ -53,9 +39,9 @@ class TestGmailAuth(TestCase):
 
             """
 
-        a = Page(self.driver)
-        a.email_form.enter_email("qewdasafdwqas341r")
-        self.assertEqual(a.email_form.get_error(), "Не удалось распознать адрес электронной почты.")
+        page = Page(self.driver)
+        page.email_form.enter_email("qewdasafdwqas341r")
+        self.assertEqual(page.email_form.get_error(), "Не удалось распознать адрес электронной почты.")
 
     def test_not_valid_email(self):
         """
@@ -70,9 +56,9 @@ class TestGmailAuth(TestCase):
 
             """
 
-        a = Page(self.driver)
-        a.email_form.enter_email("sndb11@")
-        self.assertEqual(a.email_form.get_error(), "Введите адрес электронной почты.")
+        page = Page(self.driver)
+        page.email_form.enter_email("sndb11@")
+        self.assertEqual(page.email_form.get_error(), "Введите адрес электронной почты.")
 
     def test_long_email(self):
         """
