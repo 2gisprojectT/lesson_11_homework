@@ -2,22 +2,15 @@ import unittest
 from unittest import TestCase
 
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
+
+from auth_page import Page
 
 
 class TestGmailAuth(TestCase):
     def setUp(self):
         self.driver = webdriver.Firefox()
-        self.driver.get("https://mail.google.com/")
         self.driver.implicitly_wait(5)
-
-    def wait_captcha_img(self,email):
-        captcha = self.driver.find_element_by_id("captcha-img")
-        while (True):
-            email.send_keys("a")
-            email.submit()
-            if (captcha.is_displayed()):
-                return True
+        Page(self.driver).open("https://mail.google.com/")
 
     def test_email_captcha(self):
         """
@@ -30,12 +23,9 @@ class TestGmailAuth(TestCase):
         Появляется поле ввода капчи
 
         """
-        driver = self.driver
-        email = driver.find_element_by_name("Email")
-        email.send_keys("sndb11")
-        WebDriverWait(driver, 10).until(
-            lambda s: self.wait_captcha_img(email)
-        )
+        page = Page(self.driver)
+        result = page.email_form.stop_after_some_seconds(10)
+        self.assertTrue(result)
 
     def test_not_register_email(self):
         """
@@ -49,12 +39,10 @@ class TestGmailAuth(TestCase):
             Появляется сообщение : Не удалось распознать адрес электронной почты.
 
             """
-        driver = self.driver
-        email = driver.find_element_by_name("Email")
-        email.send_keys("sndb11")
-        email.submit()
-        error = driver.find_element_by_css_selector(".has-error .error-msg")
-        self.assertEqual(error.text, "Не удалось распознать адрес электронной почты.")
+        page = Page(self.driver)
+        page.email_form.enter_email("qewdasafdwqas341r")
+        error = page.email_form.get_error()
+        self.assertEqual(error, "Не удалось распознать адрес электронной почты.")
 
     def test_not_valid_email(self):
         """
@@ -68,11 +56,9 @@ class TestGmailAuth(TestCase):
             Появляется сообщение : "Введите адрес электронной почты."
 
             """
-        driver = self.driver
-        email = driver.find_element_by_name("Email")
-        email.send_keys("sndb11@")
-        email.submit()
-        error = driver.find_element_by_css_selector(".has-error .error-msg").text
+        page = Page(self.driver)
+        page.email_form.enter_email("sndb11@")
+        error = page.email_form.get_error()
         self.assertEqual(error, "Введите адрес электронной почты.")
 
     def test_long_email(self):
@@ -87,12 +73,10 @@ class TestGmailAuth(TestCase):
             Появляется сообщение : "Слишком длинный адрес электронной почты."
 
             """
-        driver = self.driver
-        email = driver.find_element_by_name("Email")
         key = "a" * 201
-        email.send_keys(key)
-        email.submit()
-        error = driver.find_element_by_css_selector(".has-error .error-msg").text
+        page = Page(self.driver)
+        page.email_form.enter_email(key)
+        error = page.email_form.get_error()
         self.assertEqual(error, "Слишком длинный адрес электронной почты.")
 
     def test_long_passwd(self):
@@ -107,15 +91,11 @@ class TestGmailAuth(TestCase):
             Появляется сообщение : "Должно быть не более 200 символов"
 
             """
-        driver = self.driver
-        email = driver.find_element_by_name("Email")
-        email.send_keys("doctorvra4@gmail.com")
-        email.submit()
+        page = Page(self.driver)
+        page.email_form.enter_email("doctorvra4@gmail.com")
         key = "a" * 201
-        passwd = self.driver.find_element_by_name("Passwd")
-        passwd.send_keys(key)
-        passwd.submit()
-        error = driver.find_element_by_id("errormsg_0_Passwd").text
+        page.passwd_form.enter_passw(key)
+        error = page.passwd_form.get_error()
         self.assertEqual(error, "Должно быть не более 200 символов")
 
     def tearDown(self):
