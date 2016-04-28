@@ -80,7 +80,7 @@ class MyTestCase(unittest.TestCase):
         Ожидаемый результат:
         В нижней части формы отправки справа появится надпись: "Идет сохранение", а затем: "Сохранено".
         """
-        self.page.send_form.fill_one_field("just one moment...")
+        self.page.send_form.fill_body_field("just one moment...")
         self.page.message_sending.check_save("Идет сохранение")
         self.page.message_sending.check_save("Сохранено")
 
