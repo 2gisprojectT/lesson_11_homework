@@ -64,14 +64,20 @@ class OneTwoTripTests(unittest.TestCase):
         passenger_info = ("IVANOV", "IVAN", "12.12.2016", "123QWE", "12.12.2100")
 
         page_user_info.user_info.authorization_and_go_to_profile("antonprojectt@leeching.net", "test009")
-        page_user_info.passenger_info.add_passenger(passenger_info)
-        result = page_user_info.passenger_info.get_passenger_info()
+        page_user_info.user_info.add_passenger(passenger_info)
+        result = page_user_info.user_info.get_passenger_info()
 
-        self.assertEqual(result[0], passenger_info[0])
-        self.assertEqual(result[1], passenger_info[1])
-        self.assertEqual(result[2], "12 дек 2016")
-        self.assertEqual(result[3], passenger_info[3])
-        self.assertEqual(result[4], passenger_info[4])
+        last_name = result.get_last_name()
+        first_name = result.get_first_name()
+        birth_date = result.get_birth_date()
+        pass_number = result.get_pass_number()
+        pass_exp_date = result.get_pass_exp_date()
+
+        self.assertEqual(last_name, passenger_info[0])
+        self.assertEqual(first_name, passenger_info[1])
+        self.assertEqual(birth_date, "12 дек 2016")
+        self.assertEqual(pass_number, passenger_info[3])
+        self.assertEqual(pass_exp_date, passenger_info[4])
 
     def test_select_country(self):
         """
@@ -110,10 +116,9 @@ class OneTwoTripTests(unittest.TestCase):
         page_user_info.user_info.authorization_and_go_to_profile("antonprojectt@leeching.net", "test009")
         page_user_info.user_info.change_password("test123")
 
-        info_field = page_user_info.user_info.is_displayed_to_the_user()
+        info_window_displayed = page_user_info.user_info.is_displayed_to_the_user()
         result = page_user_info.user_info.get_change_password_info()
 
-        self.assertTrue(info_field)
         self.assertEqual(result, "Изменение пароля")
 
     def tearDown(self):
