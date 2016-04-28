@@ -118,7 +118,8 @@ class OneTwoTripTests(unittest.TestCase):
 
         info_window_displayed = page_user_info.user_info.is_displayed_to_the_user()
         result = page_user_info.user_info.get_change_password_info()
-
+        
+        self.assertTrue(info_window_displayed)
         self.assertEqual(result, "Изменение пароля")
 
     def tearDown(self):
