@@ -25,7 +25,7 @@ class TestGmailAuth(TestCase):
         """
         page = Page(self.driver)
         result = page.email_form.stop_after_some_seconds(10)
-        self.assertTrue(result)
+        self.assertTrue("Капча не отображается", result)
 
     def test_not_register_email(self):
         """

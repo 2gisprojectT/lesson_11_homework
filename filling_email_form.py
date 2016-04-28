@@ -12,7 +12,7 @@ class FillingEmailForm(Base_Component):
     def get_error(self):
         return self.driver.find_element_by_css_selector(".has-error .error-msg").text
 
-    def __infinity_email_loop(self):
+    def __enter_email_loop(self):
         while (True):
             self.elem.send_keys("an5t32")
             self.elem.submit()
@@ -25,7 +25,7 @@ class FillingEmailForm(Base_Component):
         self.captcha = self.driver.find_element_by_id("captcha-img")
         try:
             WebDriverWait(self.driver, time).until(
-                lambda s: self.__infinity_email_loop()
+                lambda ec: self.__enter_email_loop()
             )
         except:
             print("Программа работала слишком долго")
