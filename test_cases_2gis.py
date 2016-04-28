@@ -65,7 +65,7 @@ class SiteTestCase(TestCase):
         click_object_text = self.page.geo_card.title
 
         self.page.search_bar.search('Оперный театр')
-        self.page.search_result.first_result()
+        self.page.search_result.choose_first_result()
 
         self.assertEqual(('' + click_object_text).lower(), ('' + self.page.firm_card.title).lower())
 
