@@ -20,7 +20,7 @@ class FillingEmailForm(Base_Component):
                 self.elem = None
                 return True
 
-    def stop_after_some_seconds(self, time):
+    def send_email_some_seconds(self, time):
         self.elem = self.driver.find_element_by_name("Email")
         self.captcha = self.driver.find_element_by_id("captcha-img")
         try:

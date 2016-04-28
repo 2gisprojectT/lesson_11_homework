@@ -24,8 +24,8 @@ class TestGmailAuth(TestCase):
 
         """
         page = Page(self.driver)
-        visible = page.email_form.stop_after_some_seconds(10)
-        self.assertTrue("Капча не отображается", visible)
+        captcha_visible = page.email_form.send_email_some_seconds(10)
+        self.assertTrue("Капча не отображается", captcha_visible)
 
     def test_not_register_email(self):
         """
