@@ -1,4 +1,7 @@
 from page_auth import PageAuth
+from page_passwd import PagePasswd
+from page_email import PageEmail
+from page_request import PageRequest
 from selenium import webdriver
 import unittest
 
@@ -11,11 +14,12 @@ class auto_test_gmail(unittest.TestCase):
            2.Заполнить поля "Имя" и "Фамилия" валидными значениями.
         """
         self.driver = webdriver.Firefox()
-        self.driver.implicitly_wait(30)
+        self.driver.implicitly_wait(10)
         self.page = PageAuth(self.driver)
         self.page.open("https://accounts.google.com/SignUp?service=mail&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&ltmpl=default")
-        self.page.input_form.inputN('Петя')
-        self.page.input_form.inputL('Иванов')
+        self.page.input_form.input_name('Петя')
+        self.page.input_form.input_lastname('Иванов')
+
 
     def test_email_only_numbers(self):
         """
@@ -26,11 +30,12 @@ class auto_test_gmail(unittest.TestCase):
            Ожидание:
             Внизу поля "Имя пользователя" появляется надпись "Имя пользователя, состоящее из 8 или более символов, должно включать хотя бы одну латинскую букву (a-z)"
         """
-        self.page.input_form.inputEmail('123456789')
-        self.page.input_form.submit_button()
-        error_msg = self.page.input_form.get_errorEmail()
+        self.page_email = PageEmail(self.driver)
+        self.page_request = PageRequest(self.driver)
+        self.page_email.input_email.get_email('123456789')
+        self.page_request.input_request.submit_button()
+        error_msg = self.page_email.input_email.get_error_email()
         self.assertEqual(error_msg,"Имя пользователя, состоящее из 8 или более символов, должно включать хотя бы одну латинскую букву (a-z)")
-
 
     def test_min_email(self):
         """
@@ -41,9 +46,11 @@ class auto_test_gmail(unittest.TestCase):
            Ожидание:
             Внизу поля "Имя пользователя" появляется надпись "Допустимое количество символов: 6–30"
         """
-        self.page.input_form.inputEmail('qwert')
-        self.page.input_form.submit_button()
-        error_msg = self.page.input_form.get_errorEmail()
+        self.page_email = PageEmail(self.driver)
+        self.page_request = PageRequest(self.driver)
+        self.page_email.input_email.get_email('qwert')
+        self.page_request.input_request.submit_button()
+        error_msg = self.page_email.input_email.get_error_email()
         self.assertEqual(error_msg,"Допустимое количество символов: 6–30.")
 
     def test_max_length_passwd(self):
@@ -56,11 +63,14 @@ class auto_test_gmail(unittest.TestCase):
             Внизу поля "Пароль" появляется надпись "Должно быть не более 100 символов"
 
         """
-        self.page.input_form.inputEmail('petyaivanov0981')
+        self.page_passwd = PagePasswd(self.driver)
+        self.page_email = PageEmail(self.driver)
+        self.page_request = PageRequest(self.driver)
+        self.page_email.input_email.get_email('petyaivanov0981')
         s = "a" * 101
-        passwd = self.page.input_form.inputPD(s)
-        self.page.input_form.submit_button()
-        error_msg = self.page.input_form.get_errorPD()
+        passwd = self.page_passwd.input_passwd.get_passwd(s)
+        self.page_request.input_request.submit_button()
+        error_msg = self.page_passwd.input_passwd.get_error_passwd()
         self.assertEqual(error_msg,"Должно быть не более 100 символов")
 
     def test_passwd_frequent(self):
@@ -73,10 +83,13 @@ class auto_test_gmail(unittest.TestCase):
             Ожидание:
             Внизу поля "Пароль" появляется надпись "Этот пароль очень распространен. Защитите аккаунт от взлома – придумайте более сложный пароль."
         """
-        self.page.input_form.inputEmail('petyaivanov0981')
-        self.passwd = self.page.input_form.inputPD("12345qwerty")
-        self.page.input_form.submit_button()
-        error_msg = self.page.input_form.get_errorPD()
+        self.page_passwd = PagePasswd(self.driver)
+        self.page_email = PageEmail(self.driver)
+        self.page_request = PageRequest(self.driver)
+        self.page_email.input_email.get_email('petyaivanov0981')
+        passwd = self.page_passwd.input_passwd.get_passwd("12345qwerty")
+        self.page_request.input_request.submit_button()
+        error_msg = self.page_passwd.input_passwd.get_error_passwd()
         self.assertEqual(error_msg,'Этот пароль очень распространен. Защитите аккаунт от взлома – придумайте более сложный пароль.')
 
     def test_captcha(self):
@@ -93,6 +106,9 @@ class auto_test_gmail(unittest.TestCase):
       check = self.page.input_form.check_captcha()
       self.captcha = self.page.input_form.get_captcha()
       self.assertFalse(self.captcha)
+
+    def tearDown(self):
+        self.driver.quit()
 
 if __name__ == '__main__':
     unittest.main();
